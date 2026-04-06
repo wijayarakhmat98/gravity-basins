@@ -1,11 +1,11 @@
 import SwiftUI
 
-func main() {
-	let state = state_default()
-	let bus = bus_t()
-	let store = store_t(state : state, bus : bus)
-	let _ = controller_t(store : store)
-	app.main(store : store)
-}
-
 main()
+
+private func main() {
+	let state_b = box<state_t>(state_default)
+	let bus = bus_t()
+	withExtendedLifetime(controller_t(state_b, bus)) {
+		app.main(state_b, bus)
+	}
+}
