@@ -12,8 +12,8 @@ func dispatch(_ old : state_t, _ bus : bus_t, _ event : event_t) -> state_t {
 		case .single_tap(let source, let position, let resolution):
 			process_single_tap(old, bus, source, position, resolution)
 
-		case .double_tap(let source, let position, let resolution):
-			process_double_tap(old, source, position, resolution)
+		case .double_tap(_, let position, let resolution):
+			process_double_tap(old, position, resolution)
 
 		case .drag_start(let source, let position, let resolution):
 			process_drag_start(old, source, position, resolution)
@@ -81,18 +81,16 @@ private func process_single_tap(_ old : state_t, _ bus : bus_t, _ source : sourc
 	return new
 }
 
-private func process_double_tap(_ old : state_t, _ source : source_t, _ position : CGPoint, _ resolution : CGSize) -> state_t {
+private func process_double_tap(_ old : state_t, _ position : CGPoint, _ resolution : CGSize) -> state_t {
 	let bodies = old.bodies
 	let camera = old.camera
+	let world_position = screen_to_world(position, resolution, camera)
 	var new = old
-	if source == .editor {
-		let world_position = screen_to_world(position, resolution, camera)
-		if let i = body_select(bodies, world_position) {
-			new.bodies = body_remove(bodies, i)
-			new.editor.select = nil
-		} else {
-			new.bodies = body_add(bodies, world_position)
-		}
+	if let i = body_select(bodies, world_position) {
+		new.bodies = body_remove(bodies, i)
+		new.editor.select = nil
+	} else {
+		new.bodies = body_add(bodies, world_position)
 	}
 	return new
 }

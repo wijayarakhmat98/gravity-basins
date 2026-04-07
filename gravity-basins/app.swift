@@ -139,6 +139,7 @@ private struct view_visual : View {
 			.fill(.black)
 			.track_resolution(to : $resolution, publish : .visual)
 			.overlay_fragment(state_b.value.visual)
+			.publish_double_tap(from : .visual, with : resolution)
 			.publish_single_tap(from : .visual, with : resolution)
 	}
 }
