@@ -6,23 +6,17 @@ struct visual_t : Equatable {
 	var fragment : Image?
 }
 
-func visual_update_check(_ old : state_t, _ new : state_t) -> state_t? {
+func visual_update_check(_ old : state_t, _ new : state_t) -> Bool {
 	if new.editor.in_motion {
-		return nil
+		return false
 	}
 	if old.bodies != new.bodies {
-		return new
-	}
-	if old.simulation.mass != new.simulation.mass {
-		return new
+		return true
 	}
 	if old.editor.in_motion && !new.editor.in_motion {
-		return new
+		return true
 	}
-	if old.visual.resolution != new.visual.resolution {
-		return new
-	}
-	return nil
+	return false
 }
 
 func visual_update_resolution(_ state : state_t, _ display_scale : CGFloat, _ resolution : CGSize) -> state_t {

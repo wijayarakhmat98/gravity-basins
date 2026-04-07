@@ -4,7 +4,7 @@ import SwiftUI
 func dispatch(_ state : state_t, _ bus : bus_t, _ event : event_t) -> state_t {
 	let result : state_t? = switch (event) {
 		case .resolution(let source, let display_scale, let resolution):
-			process_resolution(state, source, display_scale, resolution)
+			process_resolution(state, bus, source, display_scale, resolution)
 
 		case .single_tap(let source, let position, let resolution):
 			process_single_tap(state, bus, source, position, resolution)
@@ -37,18 +37,24 @@ func dispatch(_ state : state_t, _ bus : bus_t, _ event : event_t) -> state_t {
 			process_in_motion(state, in_motion)
 	}
 	if var result {
-		if let new = visual_update_check(state, result) {
-			result = visual_update_fragments(new)
+		if visual_update_check(state, result) {
+			result = visual_update_fragments(result)
 		}
 		return result
 	}
 	return state
 }
 
-private func process_resolution(_ old : state_t, _ source : source_t, _ display_scale : CGFloat, _ resolution : CGSize) -> state_t {
+private func process_resolution(_ old : state_t, _ bus : bus_t, _ source : source_t, _ display_scale : CGFloat, _ resolution : CGSize) -> state_t {
 	var new = old
 	if source == .visual {
+		new.editor.in_motion = true
 		new = visual_update_resolution(new, display_scale, resolution)
+		bus.publish_debounce(
+			id : "in_motion",
+			for : .nanoseconds(100_000_000),
+			schedule : { .in_motion(false) }
+		)
 	}
 	return new
 }

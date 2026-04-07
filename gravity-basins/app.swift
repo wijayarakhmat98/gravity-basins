@@ -193,13 +193,7 @@ private struct modifier_track_resolution : ViewModifier {
 			action : { size in
 				resolution = size
 				if let source {
-					bus.publish_debounce(
-						id : "resolution",
-						for : .nanoseconds(100_000_000),
-						schedule : {
-							.resolution(source, displayScale, resolution)
-						}
-					)
+					bus.publish(.resolution(source, displayScale, resolution))
 				}
 			}
 		)
