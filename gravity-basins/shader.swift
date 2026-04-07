@@ -42,6 +42,7 @@ func shader_draw_select(_ state : state_t, _ resolution : CGSize) -> Shader? {
 }
 
 func shader_visual(_ state : state_t) -> Shader {
+	let editor = state.editor
 	let bodies = state.bodies
 	let simulation = state.simulation
 	let camera = state.camera
@@ -56,7 +57,7 @@ func shader_visual(_ state : state_t) -> Shader {
 		.float(simulation.duration),
 		.float(simulation.dt),
 		.float(simulation.epsilon),
-		.float(simulation.mass)
+		.float(editor.mass)
 	)
 }
 

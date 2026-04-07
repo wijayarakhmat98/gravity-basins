@@ -16,6 +16,8 @@ let state_default = state_t(
 
 		mass_min : 1,
 		mass_max : 48,
+		mass : 2,
+		color : color_t(1, 1, 1),
 
 		select : nil,
 		select_drag : nil,
@@ -32,8 +34,7 @@ let state_default = state_t(
 		duration : 1000,
 		dt : 0.2,
 		epsilon : 0.4,
-		speed : 50,
-		mass : 2
+		speed : 50
 	),
 
 	camera : camera_t(

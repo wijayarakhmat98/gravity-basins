@@ -5,33 +5,26 @@ struct simulation_t : Equatable {
 	let dt : Double
 	let epsilon : Double
 	let speed : Double
-	let mass : Double
 }
 
-func simulate_add(_ state : state_t, _ bus : bus_t, _ position : CGPoint) -> state_t {
-	var result = state
-	let simulation = state.simulation
-	let delay = Duration.seconds(simulation.duration / simulation.speed)
-	result.elements.append(body_t(
+func element_add(_ old : [body_t], _ editor : editor_t, _ position : CGPoint) -> [body_t] {
+	var new = old
+	new.append(body_t(
 		timestamp : Date.now,
-		mass : simulation.mass,
+		mass : editor.mass,
 		position : position,
-		color : color_t(1, 1, 1)
+		color : editor.color
 	))
-	bus.publish_delayed(for : delay, schedule : { .simulate_remove })
-	return result
+	return new
 }
 
-func simulate_remove(_ state : state_t, _ bus : bus_t) -> state_t {
-	var result = state
-	let now = Date.now
-	let simulation = state.simulation
+func element_remove(_ elements : [body_t], _ simulation : simulation_t) -> [body_t] {
 	let delay = simulation.duration / simulation.speed
-	result.elements = result.elements.filter { element in
+	let now = Date.now
+	return elements.filter { element in
 		let elapsed = element.timestamp.distance(to : now)
 		return elapsed < delay
 	}
-	return result
 }
 
 func simulate_element(

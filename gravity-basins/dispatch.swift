@@ -3,6 +3,9 @@ import SwiftUI
 
 func dispatch(_ old : state_t, _ bus : bus_t, _ event : event_t) -> state_t {
 	var new = switch (event) {
+		case .in_motion(let in_motion):
+			process_in_motion(old, in_motion)
+
 		case .resolution(let source, let display_scale, let resolution):
 			process_resolution(old, bus, source, display_scale, resolution)
 
@@ -27,18 +30,21 @@ func dispatch(_ old : state_t, _ bus : bus_t, _ event : event_t) -> state_t {
 		case .magnify_end(let source):
 			process_magnify_end(old, source)
 
-		case .simulate_remove:
-			simulate_remove(old, bus)
-
 		case .body_modify(let mass, let color):
 			process_body_modify(old, bus, mass, color)
 
-		case .in_motion(let in_motion):
-			process_in_motion(old, in_motion)
+		case .element_remove:
+			process_element_remove(old)
 	}
 	if visual_update_check(old, new) {
 		new = visual_update_fragments(new)
 	}
+	return new
+}
+
+private func process_in_motion(_ old : state_t, _ in_motion : Bool) -> state_t {
+	var new = old
+	new.editor.in_motion = in_motion
 	return new
 }
 
@@ -58,13 +64,17 @@ private func process_resolution(_ old : state_t, _ bus : bus_t, _ source : sourc
 
 private func process_single_tap(_ old : state_t, _ bus : bus_t, _ source : source_t, _ position : CGPoint, _ resolution : CGSize) -> state_t {
 	let editor = old.editor
+	let elements = old.elements
+	let simulation = old.simulation
 	let bodies = old.bodies
 	let camera = old.camera
 	let world_position = screen_to_world(position, resolution, camera)
 	let select = body_select(bodies, world_position)
 	var new = old
 	if source == .visual && select == nil {
-		new = simulate_add(old, bus, world_position)
+		let delay = Duration.seconds(simulation.duration / simulation.speed)
+		new.elements = element_add(elements, editor, world_position)
+		bus.publish_delayed(for : delay, schedule : { .element_remove })
 	} else {
 		new.editor.select = (select == editor.select) ? nil : select
 	}
@@ -154,8 +164,10 @@ private func process_body_modify(_ old : state_t, _ bus : bus_t, _ mass : Double
 	return new
 }
 
-private func process_in_motion(_ old : state_t, _ in_motion : Bool) -> state_t {
+private func process_element_remove(_ old : state_t) -> state_t {
+	let elements = old.elements
+	let simulation = old.simulation
 	var new = old
-	new.editor.in_motion = in_motion
+	new.elements = element_remove(elements, simulation)
 	return new
 }

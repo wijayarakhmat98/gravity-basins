@@ -6,6 +6,8 @@ struct editor_t : Equatable {
 
 	let mass_min : Double
 	let mass_max : Double
+	let mass : Double
+	let color : color_t
 
 	var select : Int?
 	var select_drag : Int?
