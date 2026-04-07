@@ -26,9 +26,8 @@ func visual_resolution(_ old : visual_t, _ display_scale : CGFloat, _ resolution
 	return new
 }
 
-func visual_fragment(_ old : state_t) -> visual_t {
-	let visual = old.visual
-	let shader = shader_visual(old)
+func visual_fragment(_ editor : editor_t, _ bodies : [body_t], _ simulation : simulation_t, _ camera : camera_t, _ visual : visual_t) -> visual_t {
+	let shader = shader_visual(editor, bodies, simulation, camera, visual)
 	var new = visual
 	new.fragment = view_to_image(
 		Rectangle()

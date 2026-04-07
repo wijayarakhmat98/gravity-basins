@@ -37,7 +37,7 @@ func dispatch(_ old : state_t, _ bus : bus_t, _ event : event_t) -> state_t {
 			process_element_remove(old)
 	}
 	if visual_update(old, new) {
-		new.visual = visual_fragment(new)
+		new = process_visual_update(new)
 	}
 	return new
 }
@@ -168,5 +168,16 @@ private func process_element_remove(_ old : state_t) -> state_t {
 	let simulation = old.simulation
 	var new = old
 	new.elements = element_remove(elements, simulation)
+	return new
+}
+
+private func process_visual_update(_ old : state_t) -> state_t {
+	var new = old
+	let editor = new.editor
+	let bodies = new.bodies
+	let simulation = new.simulation
+	let camera = new.camera
+	let visual = new.visual
+	new.visual = visual_fragment(editor, bodies, simulation, camera, visual)
 	return new
 }

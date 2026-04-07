@@ -93,6 +93,10 @@ private struct view_editor : View {
 
 	var body : some View {
 		let state = state_b.value
+		let editor = state.editor
+		let select = editor.select
+		let bodies = state.bodies
+		let camera = state.camera
 		Rectangle()
 			.fill(.black)
 			.track_resolution(to : $resolution)
@@ -100,8 +104,8 @@ private struct view_editor : View {
 			.publish_single_tap(from : .editor, with : resolution)
 			.publish_drag(from : .editor, with : resolution)
 			.publish_magnify(from : .editor)
-			.apply_shader(shader_draw_bodies(state, resolution))
-			.apply_shader(shader_draw_select(state, resolution))
+			.apply_shader(shader_draw_bodies(bodies, camera, resolution))
+			.apply_shader(shader_draw_select(bodies, camera, resolution, select))
 	}
 }
 
@@ -113,6 +117,10 @@ private struct view_simulate : View {
 	var body : some View {
 		TimelineView(.animation) { tl in
 			let state = state_b.value
+			let editor = state.editor
+			let select = editor.select
+			let bodies = state.bodies
+			let camera = state.camera
 			let elements = simulate_elements(state.elements, state.bodies, state.simulation)
 			Rectangle()
 				.fill(.black)
@@ -121,9 +129,9 @@ private struct view_simulate : View {
 				.publish_single_tap(from : .editor, with : resolution)
 				.publish_drag(from : .editor, with : resolution)
 				.publish_magnify(from : .editor)
-				.apply_shader(shader_draw_bodies(state, resolution))
-				.apply_shader(shader_draw_select(state, resolution))
-				.apply_shader(shader_draw_simulate(state, resolution, elements))
+				.apply_shader(shader_draw_bodies(bodies, camera, resolution))
+				.apply_shader(shader_draw_select(bodies, camera, resolution, select))
+				.apply_shader(shader_draw_bodies(elements, camera, resolution))
 		}
 	}
 }

@@ -1,8 +1,6 @@
 import SwiftUI
 
-func shader_draw_bodies(_ state : state_t, _ resolution : CGSize) -> Shader {
-	let bodies = state.bodies
-	let camera = state.camera
+func shader_draw_bodies(_ bodies : [body_t], _ camera : camera_t, _ resolution : CGSize) -> Shader {
 	return ShaderLibrary.draw_bodies(
 		.float2(resolution),
 		.float2(camera.translation),
@@ -13,40 +11,21 @@ func shader_draw_bodies(_ state : state_t, _ resolution : CGSize) -> Shader {
 	)
 }
 
-func shader_draw_simulate(_ state : state_t, _ resolution : CGSize, _ elements : [body_t]) -> Shader {
-	let camera = state.camera
-	return ShaderLibrary.draw_bodies(
+func shader_draw_select(_ bodies : [body_t], _ camera : camera_t, _ resolution : CGSize, _ i : Int?) -> Shader? {
+	guard let i else {
+		return nil
+	}
+	let body = bodies[i]
+	return ShaderLibrary.draw_select(
 		.float2(resolution),
 		.float2(camera.translation),
 		.float(camera.magnification),
-		serialize_mass(elements),
-		serialize_position(elements),
-		serialize_color(elements)
+		.float(body.mass),
+		.float2(body.position)
 	)
 }
 
-func shader_draw_select(_ state : state_t, _ resolution : CGSize) -> Shader? {
-	let bodies = state.bodies
-	let camera = state.camera
-	if let i = state.editor.select {
-		let body = bodies[i]
-		return ShaderLibrary.draw_select(
-			.float2(resolution),
-			.float2(camera.translation),
-			.float(camera.magnification),
-			.float(body.mass),
-			.float2(body.position)
-		)
-	}
-	return nil
-}
-
-func shader_visual(_ state : state_t) -> Shader {
-	let editor = state.editor
-	let bodies = state.bodies
-	let simulation = state.simulation
-	let camera = state.camera
-	let visual = state.visual
+func shader_visual(_ editor : editor_t, _ bodies : [body_t], _ simulation : simulation_t, _ camera : camera_t, _ visual : visual_t) -> Shader {
 	return ShaderLibrary.visual(
 		.float2(visual.resolution),
 		.float2(camera.translation),
