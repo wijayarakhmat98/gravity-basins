@@ -15,14 +15,12 @@ func view_to_image(_ view : some View, scale : CGFloat = 1) -> Image? {
 
 func visual_fragments_create(_ visual : visual_t, _ translation : CGPoint, _ shader : (CGSize, CGPoint) -> Shader) -> [Image]? {
 	let division = visual.division
-	let overdraw = visual.overdraw
 	let display_scale = visual.display_scale
 
 	let width = visual.resolution.width
 	let height = visual.resolution.height
 
 	let height_fragment = height / CGFloat(division)
-	let height_overdraw = height_fragment + overdraw
 
 	var fragments : [Image] = []
 
@@ -33,9 +31,9 @@ func visual_fragments_create(_ visual : visual_t, _ translation : CGPoint, _ sha
 		if let fragment = view_to_image(
 			Rectangle()
 				.fill(.black)
-				.frame(width : width, height : height_overdraw)
+				.frame(width : width, height : height_fragment)
 				.colorEffect(shader(
-					CGSize(width : width, height : height_overdraw),
+					CGSize(width : width, height : height_fragment),
 					CGPoint(x : shift_x, y : shift_y)
 				)),
 			scale : display_scale

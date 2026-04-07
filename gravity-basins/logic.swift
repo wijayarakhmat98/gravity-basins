@@ -27,7 +27,6 @@ struct simulate_t : Equatable {
 
 struct visual_t : Equatable {
 	let division : Int
-	let overdraw : CGFloat
 	var display_scale : CGFloat
 	var resolution : CGSize
 	var fragments : [Image]?
@@ -91,7 +90,6 @@ let state_default = state_t(
 
 	visual : visual_t(
 		division : 24,
-		overdraw : 1,
 		display_scale : 1,
 		resolution : .zero,
 		fragments : nil

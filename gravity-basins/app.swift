@@ -397,7 +397,7 @@ private struct modifier_overlay_fragments : ViewModifier {
 	func body(content : Content) -> some View {
 		if let fragments = visual.fragments {
 			content
-				.overlay(VStack(spacing : -visual.overdraw) {
+				.overlay(VStack(spacing : 0) {
 					ForEach(0 ..< fragments.count, id : \.self) { i in fragments[i] }
 				})
 				.clipped()
