@@ -1,21 +1,24 @@
 import SwiftUI
 
 func shader_draw_bodies(_ state : state_t, _ resolution : CGSize) -> Shader {
+	let bodies = state.bodies
+	let camera = state.camera
 	return ShaderLibrary.draw_bodies(
 		.float2(resolution),
-		.float2(state.camera.translation),
-		.float(state.camera.magnification),
-		serialize_mass(state.bodies),
-		serialize_position(state.bodies),
-		serialize_color(state.bodies)
+		.float2(camera.translation),
+		.float(camera.magnification),
+		serialize_mass(bodies),
+		serialize_position(bodies),
+		serialize_color(bodies)
 	)
 }
 
 func shader_draw_simulate(_ state : state_t, _ resolution : CGSize, _ elements : [body_t]) -> Shader {
+	let camera = state.camera
 	return ShaderLibrary.draw_bodies(
 		.float2(resolution),
-		.float2(state.camera.translation),
-		.float(state.camera.magnification),
+		.float2(camera.translation),
+		.float(camera.magnification),
 		serialize_mass(elements),
 		serialize_position(elements),
 		serialize_color(elements)
@@ -23,12 +26,14 @@ func shader_draw_simulate(_ state : state_t, _ resolution : CGSize, _ elements :
 }
 
 func shader_draw_select(_ state : state_t, _ resolution : CGSize) -> Shader? {
+	let bodies = state.bodies
+	let camera = state.camera
 	if let i = state.select {
-		let body = state.bodies[i]
+		let body = bodies[i]
 		return ShaderLibrary.draw_select(
 			.float2(resolution),
-			.float2(state.camera.translation),
-			.float(state.camera.magnification),
+			.float2(camera.translation),
+			.float(camera.magnification),
 			.float(body.mass),
 			.float2(body.position)
 		)
@@ -37,17 +42,21 @@ func shader_draw_select(_ state : state_t, _ resolution : CGSize) -> Shader? {
 }
 
 func shader_visual(_ state : state_t) -> Shader {
+	let bodies = state.bodies
+	let simulation = state.simulation
+	let camera = state.camera
+	let visual = state.visual
 	return ShaderLibrary.visual(
-		.float2(state.visual.resolution),
-		.float2(state.camera.translation),
-		.float(state.camera.magnification),
-		serialize_mass(state.bodies),
-		serialize_position(state.bodies),
-		serialize_color(state.bodies),
-		.float(state.duration),
-		.float(state.dt),
-		.float(state.epsilon),
-		.float(state.mass)
+		.float2(visual.resolution),
+		.float2(camera.translation),
+		.float(camera.magnification),
+		serialize_mass(bodies),
+		serialize_position(bodies),
+		serialize_color(bodies),
+		.float(simulation.duration),
+		.float(simulation.dt),
+		.float(simulation.epsilon),
+		.float(simulation.mass)
 	)
 }
 

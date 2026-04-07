@@ -1,10 +1,6 @@
 import SwiftUI
 
 struct state_t : Equatable {
-	let duration : Double
-	let dt : Double
-	let epsilon : Double
-
 	let mass_min : Double
 		let mass_max : Double
 
@@ -14,20 +10,14 @@ struct state_t : Equatable {
 	var select : Int?
 	var select_drag : Int?
 
-	let speed : Double
-	var mass : Double
-
 	var in_motion : Bool
 
+	var simulation : simulation_t
 	var camera : camera_t
 	var visual : visual_t
 }
 
 let state_default = state_t(
-	duration : 1000,
-	dt : 0.2,
-	epsilon : 0.4,
-
 	mass_min : 1,
 	mass_max : 48,
 
@@ -40,10 +30,15 @@ let state_default = state_t(
 	select : nil,
 	select_drag : nil,
 
-	speed : 50,
-	mass : 2,
-
 	in_motion : false,
+
+	simulation : simulation_t(
+		duration : 1000,
+		dt : 0.2,
+		epsilon : 0.4,
+		speed : 50,
+		mass : 2
+	),
 
 	camera : camera_t(
 		magnification_min : 0.001,

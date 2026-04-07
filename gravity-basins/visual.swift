@@ -13,7 +13,7 @@ func visual_update_check(_ old : state_t, _ new : state_t) -> state_t? {
 	if old.bodies != new.bodies {
 		return new
 	}
-	if old.mass != new.mass {
+	if old.simulation.mass != new.simulation.mass {
 		return new
 	}
 	if old.in_motion && !new.in_motion {

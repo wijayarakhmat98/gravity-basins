@@ -113,7 +113,7 @@ private struct view_simulate : View {
 	var body : some View {
 		TimelineView(.animation) { tl in
 			let state = state_b.value
-			let elements = simulation(state.elements, state.bodies, state.duration, state.dt, state.epsilon, state.speed)
+			let elements = simulate_elements(state.elements, state.bodies, state.simulation)
 			Rectangle()
 				.fill(.black)
 				.track_resolution(to : $resolution)
