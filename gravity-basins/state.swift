@@ -1,11 +1,5 @@
 import SwiftUI
 
-struct color_t : Equatable {
-	var red : Double
-	var green : Double
-	var blue : Double
-}
-
 struct state_t : Equatable {
 	let duration : Double
 	let dt : Double
@@ -15,13 +9,13 @@ struct state_t : Equatable {
 		let mass_max : Double
 
 	var bodies : [body_t]
+	var elements : [body_t]
 
 	var select : Int?
 	var select_drag : Int?
 
 	let speed : Double
 	var mass : Double
-	var simulate : [simulate_t]
 
 	var in_motion : Bool
 
@@ -38,16 +32,16 @@ let state_default = state_t(
 	mass_max : 48,
 
 	bodies : [
-		body_t(mass : 5, position : CGPoint(x : 0, y :  25), color : color_t(red : 1, green : 0, blue : 0)),
-		body_t(mass : 5, position : CGPoint(x : 0, y : -25), color : color_t(red : 0, green : 1, blue : 1))
+		body_t(mass : 5, position : CGPoint(x : 0, y :  25), color : color_t(1, 0, 0)),
+		body_t(mass : 5, position : CGPoint(x : 0, y : -25), color : color_t(0, 1, 1))
 	],
+	elements : [],
 
 	select : nil,
 	select_drag : nil,
 
 	speed : 50,
 	mass : 2,
-	simulate : [],
 
 	in_motion : false,
 

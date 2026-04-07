@@ -36,7 +36,7 @@ private struct view : View {
 		let state = state_b.value
 		return VStack(spacing : 16) {
 			HStack(spacing : 16) {
-				if state.simulate.count > 0 {
+				if state.elements.count > 0 {
 					view_simulate()
 						.clipShape(RoundedRectangle(cornerRadius : 16))
 				} else {
@@ -113,7 +113,7 @@ private struct view_simulate : View {
 	var body : some View {
 		TimelineView(.animation) { tl in
 			let state = state_b.value
-			let simulate = simulation(state.simulate, state.bodies, state.duration, state.dt, state.epsilon, state.speed)
+			let elements = simulation(state.elements, state.bodies, state.duration, state.dt, state.epsilon, state.speed)
 			Rectangle()
 				.fill(.black)
 				.track_resolution(to : $resolution)
@@ -123,7 +123,7 @@ private struct view_simulate : View {
 				.publish_magnify(from : .editor)
 				.apply_shader(shader_draw_bodies(state, resolution))
 				.apply_shader(shader_draw_select(state, resolution))
-				.apply_shader(shader_draw_simulate(state, resolution, simulate))
+				.apply_shader(shader_draw_simulate(state, resolution, elements))
 		}
 	}
 }

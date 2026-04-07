@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct body_t : Equatable {
+	var timestamp = Date.now
 	var mass : Double
 	var position : CGPoint
 	var color : color_t
@@ -31,7 +32,7 @@ func body_add(_ state : state_t, _ position : CGPoint) -> state_t {
 	result.bodies.append(body_t(
 		mass : 5,
 		position : position,
-		color : color_t(red : .random(in : 0..<1), green : .random(in : 0..<1), blue : .random(in : 0..<1))
+		color : color_t(.random(in : 0..<1), .random(in : 0..<1), .random(in : 0..<1))
 	))
 	return result
 }

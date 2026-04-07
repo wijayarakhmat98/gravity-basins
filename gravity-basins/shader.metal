@@ -86,25 +86,6 @@ int nearest(float2 self, int n, device float2 const* position) {
 	return in_planet ? half4(result, 1) : canvas_color;
 }
 
-[[stitchable]] half4 draw_simulate(
-	float2 canvas_position,
-	half4 canvas_color,
-	float2 canvas_resolution,
-	float2 translation,
-	float magnification,
-	device float const* mass,
-	int n,
-	device float2 const* position,
-	int
-) {
-	float2 self = screen_to_world(canvas_position, canvas_resolution, translation, magnification);
-
-	if (in_body(self, n, mass, position))
-		return half4(1, 1, 1, 1);
-
-	return canvas_color;
-}
-
 [[stitchable]] half4 draw_select(
 	float2 canvas_position,
 	half4 canvas_color,
