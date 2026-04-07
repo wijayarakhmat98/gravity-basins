@@ -31,10 +31,8 @@ private extension EnvironmentValues {
 
 private struct view : View {
 	@Environment(\.state_b) private var state_b
-	@Environment(\.bus) private var bus
 
 	var body : some View {
-		bus.publish(.log("REFRESH"))
 		let state = state_b.value
 		return VStack(spacing : 16) {
 			HStack(spacing : 16) {

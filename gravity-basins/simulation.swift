@@ -39,7 +39,6 @@ func simulate_remove(_ state : state_t, _ bus : bus_t) -> state_t {
 		let elapsed = s.timestamp.distance(to : now)
 		return elapsed < delay
 	}
-	bus.publish(.log("simulate: \(result.simulate)"))
 	return result
 }
 

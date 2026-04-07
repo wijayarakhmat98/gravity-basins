@@ -6,7 +6,7 @@ enum source_t {
 }
 
 enum event_t {
-	case log(_ message : String)
+//	case log(_ message : String)
 	case resolution(_ source : source_t, _ display_scale : CGFloat, _ resolution : CGSize)
 	case single_tap(_ source : source_t, _ position : CGPoint, _ resolution : CGSize)
 	case double_tap(_ source : source_t, _ position : CGPoint, _ resolution : CGSize)
