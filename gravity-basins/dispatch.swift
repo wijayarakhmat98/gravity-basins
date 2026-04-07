@@ -1,48 +1,45 @@
 import Combine
 import SwiftUI
 
-func dispatch(_ state : state_t, _ bus : bus_t, _ event : event_t) -> state_t {
-	let result : state_t? = switch (event) {
+func dispatch(_ old : state_t, _ bus : bus_t, _ event : event_t) -> state_t {
+	var new = switch (event) {
 		case .resolution(let source, let display_scale, let resolution):
-			process_resolution(state, bus, source, display_scale, resolution)
+			process_resolution(old, bus, source, display_scale, resolution)
 
 		case .single_tap(let source, let position, let resolution):
-			process_single_tap(state, bus, source, position, resolution)
+			process_single_tap(old, bus, source, position, resolution)
 
 		case .double_tap(let source, let position, let resolution):
-			process_double_tap(state, source, position, resolution)
+			process_double_tap(old, source, position, resolution)
 
 		case .drag_start(let source, let position, let resolution):
-			process_drag_start(state, source, position, resolution)
+			process_drag_start(old, source, position, resolution)
 
 		case .drag(let source, let delta):
-			process_drag(state, source, delta)
+			process_drag(old, source, delta)
 
 		case .drag_end(let source):
-			process_drag_end(state, source)
+			process_drag_end(old, source)
 
 		case .magnify(let source, let delta):
-			process_magnify(state, source, delta)
+			process_magnify(old, source, delta)
 
 		case .magnify_end(let source):
-			process_magnify_end(state, source)
+			process_magnify_end(old, source)
 
 		case .simulate_remove:
-			simulate_remove(state, bus)
+			simulate_remove(old, bus)
 
 		case .body_modify(let mass, let color):
-			process_body_modify(state, bus, mass, color)
+			process_body_modify(old, bus, mass, color)
 
 		case .in_motion(let in_motion):
-			process_in_motion(state, in_motion)
+			process_in_motion(old, in_motion)
 	}
-	if var result {
-		if visual_update_check(state, result) {
-			result = visual_update_fragments(result)
-		}
-		return result
+	if visual_update_check(old, new) {
+		new = visual_update_fragments(new)
 	}
-	return state
+	return new
 }
 
 private func process_resolution(_ old : state_t, _ bus : bus_t, _ source : source_t, _ display_scale : CGFloat, _ resolution : CGSize) -> state_t {
