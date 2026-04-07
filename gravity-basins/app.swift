@@ -136,7 +136,7 @@ private struct view_visual : View {
 		Rectangle()
 			.fill(.black)
 			.track_resolution(to : $resolution, publish : .visual)
-			.overlay_fragments(state_b.value.visual)
+			.overlay_fragment(state_b.value.visual)
 			.publish_single_tap(from : .visual, with : resolution)
 	}
 }
@@ -174,8 +174,8 @@ private extension View {
 		self.modifier(modifier_draw_select(resolution))
 	}
 
-	func overlay_fragments(_ visual : visual_t) -> some View {
-		self.modifier(modifier_overlay_fragments(visual))
+	func overlay_fragment(_ visual : visual_t) -> some View {
+		self.modifier(modifier_overlay_fragment(visual))
 	}
 }
 
@@ -387,7 +387,7 @@ private struct modifier_draw_select : ViewModifier {
 	}
 }
 
-private struct modifier_overlay_fragments : ViewModifier {
+private struct modifier_overlay_fragment : ViewModifier {
 	let visual : visual_t
 
 	init(_ visual : visual_t) {
@@ -395,12 +395,8 @@ private struct modifier_overlay_fragments : ViewModifier {
 	}
 
 	func body(content : Content) -> some View {
-		if let fragments = visual.fragments {
-			content
-				.overlay(VStack(spacing : 0) {
-					ForEach(0 ..< fragments.count, id : \.self) { i in fragments[i] }
-				})
-				.clipped()
+		if let fragment = visual.fragment {
+			content.overlay(fragment)
 		} else {
 			content
 		}

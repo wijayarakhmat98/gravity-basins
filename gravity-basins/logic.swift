@@ -26,10 +26,9 @@ struct simulate_t : Equatable {
 }
 
 struct visual_t : Equatable {
-	let division : Int
 	var display_scale : CGFloat
 	var resolution : CGSize
-	var fragments : [Image]?
+	var fragment : Image?
 }
 
 struct state_t : Equatable {
@@ -89,10 +88,9 @@ let state_default = state_t(
 	magnification : 5,
 
 	visual : visual_t(
-		division : 24,
 		display_scale : 1,
 		resolution : .zero,
-		fragments : nil
+		fragment : nil
 	)
 )
 
@@ -331,21 +329,25 @@ private func visual_update_resolution(_ state : state_t, _ display_scale : CGFlo
 
 private func visual_update_fragments(_ state : state_t) -> state_t {
 	var result = state
-	let shader = { (_ resolution : CGSize, _ translation : CGPoint) in
-		ShaderLibrary.visual(
-			.float2(resolution),
-			.float2(translation),
-			.float(state.magnification),
-			body_serialize_mass(state.bodies),
-			body_serialize_position(state.bodies),
-			body_serialize_color(state.bodies),
-			.float(state.duration),
-			.float(state.dt),
-			.float(state.epsilon),
-			.float(state.mass)
-		)
-	}
-	result.visual.fragments = visual_fragments_create(state.visual, state.translation, shader)
+	let visual = state.visual
+	let shader = ShaderLibrary.visual(
+		.float2(visual.resolution),
+		.float2(state.translation),
+		.float(state.magnification),
+		body_serialize_mass(state.bodies),
+		body_serialize_position(state.bodies),
+		body_serialize_color(state.bodies),
+		.float(state.duration),
+		.float(state.dt),
+		.float(state.epsilon),
+		.float(state.mass)
+	)
+	result.visual.fragment = view_to_image(
+		Rectangle()
+			.frame(width : visual.resolution.width, height : visual.resolution.height)
+			.colorEffect(shader),
+		scale : visual.display_scale
+	)
 	return result
 }
 
