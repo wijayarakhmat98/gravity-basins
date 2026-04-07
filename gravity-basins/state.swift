@@ -2,7 +2,7 @@ import SwiftUI
 
 struct state_t : Equatable {
 	let mass_min : Double
-		let mass_max : Double
+	let mass_max : Double
 
 	var bodies : [body_t]
 	var elements : [body_t]
