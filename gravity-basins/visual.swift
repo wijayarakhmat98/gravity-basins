@@ -35,18 +35,7 @@ func visual_update_resolution(_ state : state_t, _ display_scale : CGFloat, _ re
 func visual_update_fragments(_ state : state_t) -> state_t {
 	var result = state
 	let visual = state.visual
-	let shader = ShaderLibrary.visual(
-		.float2(visual.resolution),
-		.float2(state.translation),
-		.float(state.magnification),
-		body_serialize_mass(state.bodies),
-		body_serialize_position(state.bodies),
-		body_serialize_color(state.bodies),
-		.float(state.duration),
-		.float(state.dt),
-		.float(state.epsilon),
-		.float(state.mass)
-	)
+	let shader = shader_visual(state)
 	result.visual.fragment = view_to_image(
 		Rectangle()
 			.frame(width : visual.resolution.width, height : visual.resolution.height)

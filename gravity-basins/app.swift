@@ -87,9 +87,12 @@ private struct view_toolbar : View {
 }
 
 private struct view_editor : View {
+	@Environment(\.state_b) private var state_b
+
 	@State private var resolution : CGSize = .zero
 
 	var body : some View {
+		let state = state_b.value
 		Rectangle()
 			.fill(.black)
 			.track_resolution(to : $resolution)
@@ -97,8 +100,8 @@ private struct view_editor : View {
 			.publish_single_tap(from : .editor, with : resolution)
 			.publish_drag(from : .editor, with : resolution)
 			.publish_magnify(from : .editor)
-			.draw_bodies(resolution)
-			.draw_select(resolution)
+			.apply_shader(shader_draw_bodies(state, resolution))
+			.apply_shader(shader_draw_select(state, resolution))
 	}
 }
 
@@ -118,9 +121,9 @@ private struct view_simulate : View {
 				.publish_single_tap(from : .editor, with : resolution)
 				.publish_drag(from : .editor, with : resolution)
 				.publish_magnify(from : .editor)
-				.draw_bodies(resolution)
-				.draw_select(resolution)
-				.draw_simulate(simulate, resolution)
+				.apply_shader(shader_draw_bodies(state, resolution))
+				.apply_shader(shader_draw_select(state, resolution))
+				.apply_shader(shader_draw_simulate(state, resolution, simulate))
 		}
 	}
 }
@@ -160,16 +163,8 @@ private extension View {
 		self.modifier(modifier_publish_magnify(from : source))
 	}
 
-	func draw_bodies(_ resolution : CGSize) -> some View {
-		self.modifier(modifier_draw_bodies(resolution))
-	}
-
-	func draw_simulate(_ simulate : [simulate_t], _ resolution : CGSize) -> some View {
-		self.modifier(modifier_draw_simulate(simulate, resolution))
-	}
-
-	func draw_select( _ resolution : CGSize) -> some View {
-		self.modifier(modifier_draw_select(resolution))
+	func apply_shader(_ shader : Shader?) -> some View {
+		self.modifier(modifier_apply_shader(shader))
 	}
 
 	func overlay_fragment(_ visual : visual_t) -> some View {
@@ -309,73 +304,15 @@ private struct modifier_publish_magnify : ViewModifier {
 	}
 }
 
-private struct modifier_draw_bodies : ViewModifier {
-	@Environment(\.state_b) private var state_b
+private struct modifier_apply_shader : ViewModifier {
+	let shader : Shader?
 
-	let resolution : CGSize
-
-	init(_ resolution : CGSize) {
-		self.resolution = resolution
+	init(_ shader : Shader?) {
+		self.shader = shader
 	}
 
 	func body(content : Content) -> some View {
-		let state = state_b.value
-		let shader = ShaderLibrary.draw_bodies(
-			.float2(resolution),
-			.float2(state.translation),
-			.float(state.magnification),
-			body_serialize_mass(state.bodies),
-			body_serialize_position(state.bodies),
-			body_serialize_color(state.bodies)
-		)
-		content.colorEffect(shader)
-	}
-}
-
-private struct modifier_draw_simulate : ViewModifier {
-	@Environment(\.state_b) private var state_b
-
-	let simulate : [simulate_t]
-	let resolution : CGSize
-
-	init(_ simulate : [simulate_t], _ resolution : CGSize) {
-		self.simulate = simulate
-		self.resolution = resolution
-	}
-
-	func body(content : Content) -> some View {
-		let state = state_b.value
-		let shader = ShaderLibrary.draw_simulate(
-			.float2(resolution),
-			.float2(state.translation),
-			.float(state.magnification),
-			simulate_serialize_mass(simulate),
-			simulate_serialize_position(simulate)
-		)
-		content.colorEffect(shader)
-	}
-}
-
-private struct modifier_draw_select : ViewModifier {
-	@Environment(\.state_b) private var state_b
-
-	let resolution : CGSize
-
-	init(_ resolution : CGSize) {
-		self.resolution = resolution
-	}
-
-	func body(content : Content) -> some View {
-		let state = state_b.value
-		if let i = state.select {
-			let body = state.bodies[i]
-			let shader = ShaderLibrary.draw_select(
-				.float2(resolution),
-				.float2(state.translation),
-				.float(state.magnification),
-				.float(body.mass),
-				.float2(body.position)
-			)
+		if let shader {
 			content.colorEffect(shader)
 		} else {
 			content

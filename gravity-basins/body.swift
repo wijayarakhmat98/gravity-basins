@@ -6,21 +6,6 @@ struct body_t : Equatable {
 	var color : color_t
 }
 
-func body_serialize_mass(_ bodies : [body_t]) -> Shader.Argument {
-	return .floatArray(bodies.map {body in Float(body.mass) })
-}
-
-func body_serialize_position(_ bodies : [body_t]) -> Shader.Argument {
-	return .floatArray(bodies.flatMap {body in [Float(body.position.x), Float(body.position.y)] })
-}
-
-func body_serialize_color(_ bodies : [body_t]) -> Shader.Argument {
-	return .colorArray(bodies.map {body in
-		let color = body.color
-		return Color(red : color.red, green : color.green, blue : color.blue)
-	})
-}
-
 func body_select(_ state : state_t, _ position : CGPoint) -> Int? {
 	var nearest_r : Double = .infinity
 	var nearest_i : Int = -1

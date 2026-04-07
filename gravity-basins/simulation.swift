@@ -6,19 +6,6 @@ struct simulate_t : Equatable {
 	var position : CGPoint
 }
 
-func simulate_serialize_timestamp(_ simulate : [simulate_t]) -> Shader.Argument {
-	let now = Date.now
-	return .floatArray(simulate.map {s in Float(s.timestamp.distance(to : now)) })
-}
-
-func simulate_serialize_mass(_ simulate : [simulate_t]) -> Shader.Argument {
-	return .floatArray(simulate.map {s in Float(s.mass) })
-}
-
-func simulate_serialize_position(_ simulate : [simulate_t]) -> Shader.Argument {
-	return .floatArray(simulate.flatMap {s in [Float(s.position.x), Float(s.position.y)] })
-}
-
 func simulate_add(_ state : state_t, _ bus : bus_t, _ position : CGPoint) -> state_t {
 	var result = state
 	let delay = Duration.seconds(state.duration / state.speed)
