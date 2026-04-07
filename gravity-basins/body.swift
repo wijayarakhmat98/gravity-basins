@@ -79,13 +79,11 @@ func body_update(_ state : state_t, _ bus : bus_t, _ mass : Double, _ red : Doub
 		result.bodies[i] = body
 	}
 	result.in_motion = true
-	result.body_task?.cancel()
-	result.body_task = Task {
-		try? await Task.sleep(nanoseconds : 100_000_000)
-		if !Task.isCancelled {
-			bus.publish(.body_update_done)
-		}
-	}
+	bus.publish_debounce(
+		id : "body",
+		for : .nanoseconds(100_000_000),
+		schedule : { .body_update_done }
+	)
 	return result
 }
 

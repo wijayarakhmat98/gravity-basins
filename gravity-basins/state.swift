@@ -13,7 +13,6 @@ struct state_t : Equatable {
 
 	let mass_min : Double
 	let mass_max : Double
-	var body_task : Task<Void, Never>?
 
 	var bodies : [body_t]
 
@@ -41,7 +40,6 @@ let state_default = state_t(
 
 	mass_min : 1,
 	mass_max : 48,
-	body_task : nil,
 
 	bodies : [
 		body_t(mass : 5, position : CGPoint(x : 0, y :  25), color : color_t(red : 1, green : 0, blue : 0)),

@@ -183,8 +183,6 @@ private struct modifier_track_resolution : ViewModifier {
 
 	@Binding var resolution : CGSize
 
-	@State private var task : Task<Void, Never>?
-
 	let source : source_t?
 
 	init(to resolution : Binding<CGSize>, publish source : source_t? = nil) {
@@ -199,13 +197,13 @@ private struct modifier_track_resolution : ViewModifier {
 			action : { size in
 				resolution = size
 				if let source {
-					task?.cancel()
-					task = Task {
-						try? await Task.sleep(nanoseconds : 100_000_000)
-						if !Task.isCancelled {
-							bus.publish(.resolution(source, displayScale, resolution))
+					bus.publish_debounce(
+						id : "resolution",
+						for : .nanoseconds(100_000_000),
+						schedule : {
+							.resolution(source, displayScale, resolution)
 						}
-					}
+					)
 				}
 			}
 		)
