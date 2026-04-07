@@ -4,13 +4,12 @@ struct state_t : Equatable {
 	let mass_min : Double
 	let mass_max : Double
 
-	var bodies : [body_t]
-	var elements : [body_t]
-
 	var select : Int?
 	var select_drag : Int?
-
 	var in_motion : Bool
+
+	var bodies : [body_t]
+	var elements : [body_t]
 
 	var simulation : simulation_t
 	var camera : camera_t
@@ -21,16 +20,15 @@ let state_default = state_t(
 	mass_min : 1,
 	mass_max : 48,
 
+	select : nil,
+	select_drag : nil,
+	in_motion : false,
+
 	bodies : [
 		body_t(mass : 5, position : CGPoint(x : 0, y :  25), color : color_t(1, 0, 0)),
 		body_t(mass : 5, position : CGPoint(x : 0, y : -25), color : color_t(0, 1, 1))
 	],
 	elements : [],
-
-	select : nil,
-	select_drag : nil,
-
-	in_motion : false,
 
 	simulation : simulation_t(
 		duration : 1000,

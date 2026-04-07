@@ -16,6 +16,6 @@ enum event_t {
 	case magnify(_ source : source_t, _ delta : CGFloat)
 	case magnify_end(_ source : source_t)
 	case simulate_remove
-	case body_update(_ mass : Double, _ red : Double, _ green : Double, _ blue : Double)
-	case body_update_done
+	case body_modify(_ mass : Double, _ color : color_t)
+	case in_motion(_ in_motion : Bool)
 }
