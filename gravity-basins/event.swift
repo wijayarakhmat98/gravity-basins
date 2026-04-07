@@ -6,7 +6,6 @@ enum source_t {
 }
 
 enum event_t {
-//	case log(_ message : String)
 	case in_motion(_ in_motion : Bool)
 	case resolution(_ source : source_t, _ display_scale : CGFloat, _ resolution : CGSize)
 	case single_tap(_ source : source_t, _ position : CGPoint, _ resolution : CGSize)
