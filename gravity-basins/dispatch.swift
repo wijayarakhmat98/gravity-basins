@@ -109,7 +109,7 @@ private func process_drag(_ state : state_t, _ bus : bus_t, _ source : source_t,
 		if let _ = state.select_drag {
 			result = body_translate(state, delta)
 		} else {
-			result = update_translation(result, delta)
+			result.camera = camera_translate(result.camera, delta)
 		}
 	}
 	return result
@@ -125,7 +125,7 @@ private func process_magnify(_ state : state_t, _ bus : bus_t, _ source : source
 	var result = state
 	if source == .editor {
 		result.in_motion = true
-		result = update_magnification(result, delta)
+		result.camera = camera_magnify(result.camera, delta)
 	}
 	return result
 }

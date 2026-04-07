@@ -8,24 +8,27 @@ struct camera_t : Equatable {
 	var magnification : CGFloat
 }
 
-func update_translation(_ state : state_t, _ delta : CGSize) -> state_t {
-	var result = state
-	result.camera.translation.x -= delta.width
-	result.camera.translation.y += delta.height
-	return result
+func camera_translate(_ old : camera_t, _ delta : CGSize) -> camera_t {
+	var new = old
+	new.translation.x -= delta.width
+	new.translation.y += delta.height
+	return new
 }
 
-func update_magnification(_ state : state_t, _ delta : CGFloat) -> state_t {
-	var result = state
-	if !delta.isNaN {
-		result.camera.translation.x *= 2 - 1 / delta
-		result.camera.translation.y *= 2 - 1 / delta
-		result.camera.magnification *= delta
-		if result.camera.magnification < state.camera.magnification_min || result.camera.magnification > state.camera.magnification_max {
-			result = state
-		}
+func camera_magnify(_ old : camera_t, _ delta : CGFloat) -> camera_t {
+	if delta.isNaN {
+		return old
 	}
-	return result
+	let magnification_min = old.magnification_min
+	let magnification_max = old.magnification_max
+	var new = old
+	new.translation.x *= 2 - 1 / delta
+	new.translation.y *= 2 - 1 / delta
+	new.magnification *= delta
+	if new.magnification < magnification_min || new.magnification > magnification_max {
+		new = old
+	}
+	return new
 }
 
 func screen_to_world(_ position : CGPoint, _ resolution : CGSize, _ camera : camera_t) -> CGPoint {
