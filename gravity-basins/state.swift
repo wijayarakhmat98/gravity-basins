@@ -1,28 +1,26 @@
 import SwiftUI
 
 struct state_t : Equatable {
-	let mass_min : Double
-	let mass_max : Double
-
-	var select : Int?
-	var select_drag : Int?
-	var in_motion : Bool
-
+	var editor : editor_t
 	var bodies : [body_t]
 	var elements : [body_t]
-
 	var simulation : simulation_t
 	var camera : camera_t
 	var visual : visual_t
 }
 
 let state_default = state_t(
-	mass_min : 1,
-	mass_max : 48,
+	editor : editor_t(
+		magnification_min : 0.001,
+		magnification_max : 1000,
 
-	select : nil,
-	select_drag : nil,
-	in_motion : false,
+		mass_min : 1,
+		mass_max : 48,
+
+		select : nil,
+		select_drag : nil,
+		in_motion : false
+	),
 
 	bodies : [
 		body_t(mass : 5, position : CGPoint(x : 0, y :  25), color : color_t(1, 0, 0)),
@@ -39,11 +37,8 @@ let state_default = state_t(
 	),
 
 	camera : camera_t(
-		magnification_min : 0.001,
-		magnification_max : 1000,
-
 		translation : CGPoint(x : 0, y : 0),
-		magnification : 5,
+		magnification : 5
 	),
 
 	visual : visual_t(

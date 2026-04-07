@@ -7,7 +7,7 @@ struct visual_t : Equatable {
 }
 
 func visual_update_check(_ old : state_t, _ new : state_t) -> state_t? {
-	if new.in_motion {
+	if new.editor.in_motion {
 		return nil
 	}
 	if old.bodies != new.bodies {
@@ -16,7 +16,7 @@ func visual_update_check(_ old : state_t, _ new : state_t) -> state_t? {
 	if old.simulation.mass != new.simulation.mass {
 		return new
 	}
-	if old.in_motion && !new.in_motion {
+	if old.editor.in_motion && !new.editor.in_motion {
 		return new
 	}
 	if old.visual.resolution != new.visual.resolution {

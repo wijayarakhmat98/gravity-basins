@@ -65,12 +65,13 @@ private struct view_toolbar : View {
 	var body : some View {
 		let state = state_b.value
 		HStack(spacing : 0) {
-			if let i = state.select {
+			let editor = state.editor
+			if let i = editor.select {
 				let body = state.bodies[i]
 				let color = body.color
 				Spacer(minLength : 32)
 				Text("Mass:")
-				Slider(value : Binding( get : { body.mass }, set : { mass in bus.publish(.body_modify(mass, color_t(color.red, color.green, color.blue))) }), in : state.mass_min...state.mass_max)
+				Slider(value : Binding( get : { body.mass }, set : { mass in bus.publish(.body_modify(mass, color_t(color.red, color.green, color.blue))) }), in : editor.mass_min...editor.mass_max)
 				Spacer(minLength : 32)
 				Text("Red:")
 				Slider(value : Binding( get : { color.red }, set : { red in bus.publish(.body_modify(body.mass, color_t(red, color.green, color.blue))) }), in : 0...1)

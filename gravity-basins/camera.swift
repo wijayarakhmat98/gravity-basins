@@ -1,9 +1,6 @@
 import SwiftUI
 
 struct camera_t : Equatable {
-	let magnification_min : CGFloat
-	let magnification_max : CGFloat
-
 	var translation : CGPoint
 	var magnification : CGFloat
 }
@@ -15,12 +12,12 @@ func camera_translate(_ old : camera_t, _ delta : CGSize) -> camera_t {
 	return new
 }
 
-func camera_magnify(_ old : camera_t, _ delta : CGFloat) -> camera_t {
+func camera_magnify(_ old : camera_t, _ delta : CGFloat, _ editor : editor_t) -> camera_t {
 	if delta.isNaN {
 		return old
 	}
-	let magnification_min = old.magnification_min
-	let magnification_max = old.magnification_max
+	let magnification_min = editor.magnification_min
+	let magnification_max = editor.magnification_max
 	var new = old
 	new.translation.x *= 2 - 1 / delta
 	new.translation.y *= 2 - 1 / delta

@@ -45,24 +45,25 @@ func dispatch(_ state : state_t, _ bus : bus_t, _ event : event_t) -> state_t {
 	return state
 }
 
-private func process_resolution(_ state : state_t, _ source : source_t, _ display_scale : CGFloat, _ resolution : CGSize) -> state_t {
-	var result = state
+private func process_resolution(_ old : state_t, _ source : source_t, _ display_scale : CGFloat, _ resolution : CGSize) -> state_t {
+	var new = old
 	if source == .visual {
-		result = visual_update_resolution(result, display_scale, resolution)
+		new = visual_update_resolution(new, display_scale, resolution)
 	}
-	return result
+	return new
 }
 
 private func process_single_tap(_ old : state_t, _ bus : bus_t, _ source : source_t, _ position : CGPoint, _ resolution : CGSize) -> state_t {
+	let editor = old.editor
 	let bodies = old.bodies
 	let camera = old.camera
-	var new = old
 	let world_position = screen_to_world(position, resolution, camera)
 	let select = body_select(bodies, world_position)
+	var new = old
 	if source == .visual && select == nil {
 		new = simulate_add(old, bus, world_position)
 	} else {
-		new.select = (select == old.select) ? nil : select
+		new.editor.select = (select == editor.select) ? nil : select
 	}
 	return new
 }
@@ -75,7 +76,7 @@ private func process_double_tap(_ old : state_t, _ source : source_t, _ position
 		let world_position = screen_to_world(position, resolution, camera)
 		if let i = body_select(bodies, world_position) {
 			new.bodies = body_remove(bodies, i)
-			new.select = nil
+			new.editor.select = nil
 		} else {
 			new.bodies = body_add(bodies, world_position)
 		}
@@ -89,55 +90,58 @@ private func process_drag_start(_ old : state_t, _ source : source_t, _ position
 	var new = old
 	if source == .editor {
 		let world_position = screen_to_world(position, resolution, camera)
-		new.in_motion = true
-		new.select_drag = body_select(bodies, world_position)
+		new.editor.in_motion = true
+		new.editor.select_drag = body_select(bodies, world_position)
 	}
 	return new
 }
 
 private func process_drag(_ old : state_t, _ source : source_t, _ delta : CGSize) -> state_t {
-	let select = old.select
-	let select_drag = old.select_drag
+	let editor = old.editor
+	let select_drag = editor.select_drag
 	let bodies = old.bodies
 	let camera = old.camera
 	var new = old
 	if source == .editor {
-		new.in_motion = true
+		new.editor.in_motion = true
 		if select_drag == nil {
 			new.camera = camera_translate(camera, delta)
 		} else {
-			new.bodies = body_translate(bodies, select, delta, camera)
+			new.bodies = body_translate(bodies, select_drag, delta, camera)
 		}
 	}
 	return new
 }
 
-private func process_drag_end(_ state : state_t, _ source : source_t) -> state_t {
-	var result = state
-	result.in_motion = false
-	return result
+private func process_drag_end(_ old : state_t, _ source : source_t) -> state_t {
+	var new = old
+	new.editor.in_motion = false
+	return new
 }
 
-private func process_magnify(_ state : state_t, _ source : source_t, _ delta : CGFloat) -> state_t {
-	var result = state
+private func process_magnify(_ old : state_t, _ source : source_t, _ delta : CGFloat) -> state_t {
+	let editor = old.editor
+	let camera = old.camera
+	var new = old
 	if source == .editor {
-		result.in_motion = true
-		result.camera = camera_magnify(result.camera, delta)
+		new.editor.in_motion = true
+		new.camera = camera_magnify(camera, delta, editor)
 	}
-	return result
+	return new
 }
 
-private func process_magnify_end(_ state : state_t, _ source : source_t) -> state_t {
-	var result = state
-	result.in_motion = false
-	return result
+private func process_magnify_end(_ old : state_t, _ source : source_t) -> state_t {
+	var new = old
+	new.editor.in_motion = false
+	return new
 }
 
 private func process_body_modify(_ old : state_t, _ bus : bus_t, _ mass : Double, _ color : color_t) -> state_t {
-	let select = old.select
+	let editor = old.editor
+	let select = editor.select
 	let bodies = old.bodies
 	var new = old
-	new.in_motion = true
+	new.editor.in_motion = true
 	new.bodies = body_modify(bodies, select, mass, color)
 	bus.publish_debounce(
 		id : "in_motion",
@@ -149,6 +153,6 @@ private func process_body_modify(_ old : state_t, _ bus : bus_t, _ mass : Double
 
 private func process_in_motion(_ old : state_t, _ in_motion : Bool) -> state_t {
 	var new = old
-	new.in_motion = in_motion
+	new.editor.in_motion = in_motion
 	return new
 }

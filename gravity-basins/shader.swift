@@ -28,7 +28,7 @@ func shader_draw_simulate(_ state : state_t, _ resolution : CGSize, _ elements :
 func shader_draw_select(_ state : state_t, _ resolution : CGSize) -> Shader? {
 	let bodies = state.bodies
 	let camera = state.camera
-	if let i = state.select {
+	if let i = state.editor.select {
 		let body = bodies[i]
 		return ShaderLibrary.draw_select(
 			.float2(resolution),
