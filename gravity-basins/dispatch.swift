@@ -36,8 +36,8 @@ func dispatch(_ old : state_t, _ bus : bus_t, _ event : event_t) -> state_t {
 		case .element_remove:
 			process_element_remove(old)
 	}
-	if visual_update_check(old, new) {
-		new = visual_update_fragments(new)
+	if visual_update(old, new) {
+		new.visual = visual_fragment(new)
 	}
 	return new
 }
@@ -49,10 +49,11 @@ private func process_in_motion(_ old : state_t, _ in_motion : Bool) -> state_t {
 }
 
 private func process_resolution(_ old : state_t, _ bus : bus_t, _ source : source_t, _ display_scale : CGFloat, _ resolution : CGSize) -> state_t {
+	let visual = old.visual
 	var new = old
 	if source == .visual {
 		new.editor.in_motion = true
-		new = visual_update_resolution(new, display_scale, resolution)
+		new.visual = visual_resolution(visual, display_scale, resolution)
 		bus.publish_debounce(
 			id : "in_motion",
 			for : .nanoseconds(100_000_000),

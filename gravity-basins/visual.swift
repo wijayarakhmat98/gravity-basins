@@ -6,7 +6,7 @@ struct visual_t : Equatable {
 	var fragment : Image?
 }
 
-func visual_update_check(_ old : state_t, _ new : state_t) -> Bool {
+func visual_update(_ old : state_t, _ new : state_t) -> Bool {
 	if new.editor.in_motion {
 		return false
 	}
@@ -19,24 +19,24 @@ func visual_update_check(_ old : state_t, _ new : state_t) -> Bool {
 	return false
 }
 
-func visual_update_resolution(_ state : state_t, _ display_scale : CGFloat, _ resolution : CGSize) -> state_t {
-	var result = state
-	result.visual.display_scale = display_scale
-	result.visual.resolution = resolution
-	return result
+func visual_resolution(_ old : visual_t, _ display_scale : CGFloat, _ resolution : CGSize) -> visual_t {
+	var new = old
+	new.display_scale = display_scale
+	new.resolution = resolution
+	return new
 }
 
-func visual_update_fragments(_ state : state_t) -> state_t {
-	var result = state
-	let visual = state.visual
-	let shader = shader_visual(state)
-	result.visual.fragment = view_to_image(
+func visual_fragment(_ old : state_t) -> visual_t {
+	let visual = old.visual
+	let shader = shader_visual(old)
+	var new = visual
+	new.fragment = view_to_image(
 		Rectangle()
 			.frame(width : visual.resolution.width, height : visual.resolution.height)
 			.colorEffect(shader),
 		scale : visual.display_scale
 	)
-	return result
+	return new
 }
 
 @MainActor
