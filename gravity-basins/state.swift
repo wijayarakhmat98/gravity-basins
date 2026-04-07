@@ -12,7 +12,7 @@ struct state_t : Equatable {
 	let epsilon : Double
 
 	let mass_min : Double
-	let mass_max : Double
+		let mass_max : Double
 
 	var bodies : [body_t]
 
@@ -23,13 +23,9 @@ struct state_t : Equatable {
 	var mass : Double
 	var simulate : [simulate_t]
 
-	let magnification_min : CGFloat
-	let magnification_max : CGFloat
-
 	var in_motion : Bool
-	var translation : CGPoint
-	var magnification : CGFloat
 
+	var camera : camera_t
 	var visual : visual_t
 }
 
@@ -53,12 +49,15 @@ let state_default = state_t(
 	mass : 2,
 	simulate : [],
 
-	magnification_min : 0.001,
-	magnification_max : 1000,
-
 	in_motion : false,
-	translation : CGPoint(x : 0, y : 0),
-	magnification : 5,
+
+	camera : camera_t(
+		magnification_min : 0.001,
+		magnification_max : 1000,
+
+		translation : CGPoint(x : 0, y : 0),
+		magnification : 5,
+	),
 
 	visual : visual_t(
 		display_scale : 1,

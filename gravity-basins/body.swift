@@ -46,8 +46,8 @@ func body_translate(_ state : state_t, _ delta : CGSize) -> state_t {
 	var result = state
 	if let i = state.select_drag {
 		var body = state.bodies[i]
-		body.position.x += delta.width / state.magnification
-		body.position.y -= delta.height / state.magnification
+		body.position.x += delta.width / state.camera.magnification
+		body.position.y -= delta.height / state.camera.magnification
 		result.bodies[i] = body
 	}
 	return result

@@ -63,7 +63,7 @@ private func process_resolution(_ state : state_t, _ bus : bus_t, _ source : sou
 
 private func process_single_tap(_ state : state_t, _ bus : bus_t, _ source : source_t, _ position : CGPoint, _ resolution : CGSize) -> state_t {
 	var result = state
-	let world_position = screen_to_world(position, resolution, state.translation, state.magnification)
+	let world_position = screen_to_world(position, resolution, state.camera)
 	if source == .editor {
 		let select = body_select(state, world_position)
 		result.select = (select == result.select) ? nil : select
@@ -81,7 +81,7 @@ private func process_single_tap(_ state : state_t, _ bus : bus_t, _ source : sou
 private func process_double_tap(_ state : state_t, _ bus : bus_t, _ source : source_t, _ position : CGPoint, _ resolution : CGSize) -> state_t {
 	var result = state
 	if source == .editor {
-		let world_position = screen_to_world(position, resolution, state.translation, state.magnification)
+		let world_position = screen_to_world(position, resolution, state.camera)
 		if let i = body_select(state, world_position) {
 			result = body_remove(state, i)
 			result.select = nil
@@ -95,7 +95,7 @@ private func process_double_tap(_ state : state_t, _ bus : bus_t, _ source : sou
 private func process_drag_start(_ state : state_t, _ bus : bus_t, _ source : source_t, _ position : CGPoint, _ resolution : CGSize) -> state_t {
 	var result = state
 	if source == .editor {
-		let world_position = screen_to_world(position, resolution, state.translation, state.magnification)
+		let world_position = screen_to_world(position, resolution, state.camera)
 		result.in_motion = true
 		result.select_drag = body_select(state, world_position)
 	}

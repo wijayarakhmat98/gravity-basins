@@ -3,8 +3,8 @@ import SwiftUI
 func shader_draw_bodies(_ state : state_t, _ resolution : CGSize) -> Shader {
 	return ShaderLibrary.draw_bodies(
 		.float2(resolution),
-		.float2(state.translation),
-		.float(state.magnification),
+		.float2(state.camera.translation),
+		.float(state.camera.magnification),
 		body_serialize_mass(state.bodies),
 		body_serialize_position(state.bodies),
 		body_serialize_color(state.bodies)
@@ -14,8 +14,8 @@ func shader_draw_bodies(_ state : state_t, _ resolution : CGSize) -> Shader {
 func shader_draw_simulate(_ state : state_t, _ resolution : CGSize, _ simulate : [simulate_t]) -> Shader {
 	return ShaderLibrary.draw_simulate(
 		.float2(resolution),
-		.float2(state.translation),
-		.float(state.magnification),
+		.float2(state.camera.translation),
+		.float(state.camera.magnification),
 		simulate_serialize_mass(simulate),
 		simulate_serialize_position(simulate)
 	)
@@ -26,8 +26,8 @@ func shader_draw_select(_ state : state_t, _ resolution : CGSize) -> Shader? {
 		let body = state.bodies[i]
 		return ShaderLibrary.draw_select(
 			.float2(resolution),
-			.float2(state.translation),
-			.float(state.magnification),
+			.float2(state.camera.translation),
+			.float(state.camera.magnification),
 			.float(body.mass),
 			.float2(body.position)
 		)
@@ -38,8 +38,8 @@ func shader_draw_select(_ state : state_t, _ resolution : CGSize) -> Shader? {
 func shader_visual(_ state : state_t) -> Shader {
 	return ShaderLibrary.visual(
 		.float2(state.visual.resolution),
-		.float2(state.translation),
-		.float(state.magnification),
+		.float2(state.camera.translation),
+		.float(state.camera.magnification),
 		body_serialize_mass(state.bodies),
 		body_serialize_position(state.bodies),
 		body_serialize_color(state.bodies),
