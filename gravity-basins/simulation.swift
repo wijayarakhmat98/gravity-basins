@@ -1,15 +1,46 @@
 import SwiftUI
 
-func screen_to_world(_ position : CGPoint, _ resolution : CGSize, _ translation : CGPoint, _ magnification : CGFloat) -> CGPoint {
-	let x = (translation.x - resolution.width  / 2 + position.x) / magnification
-	let y = (translation.y + resolution.height / 2 - position.y) / magnification
-	return CGPoint(x : x, y : y)
+struct simulate_t : Equatable {
+	var timestamp : Date
+	var mass : Double
+	var position : CGPoint
 }
 
-func world_to_screen(_ position : CGPoint, _ resolution : CGSize, _ translation : CGPoint, _ magnification : CGFloat) -> CGPoint {
-	let x = resolution.width  / 2 - translation.x + position.x * magnification
-	let y = resolution.height / 2 + translation.y - position.y * magnification
-	return CGPoint(x : x, y : y)
+func simulate_serialize_timestamp(_ simulate : [simulate_t]) -> Shader.Argument {
+	let now = Date.now
+	return .floatArray(simulate.map {s in Float(s.timestamp.distance(to : now)) })
+}
+
+func simulate_serialize_mass(_ simulate : [simulate_t]) -> Shader.Argument {
+	return .floatArray(simulate.map {s in Float(s.mass) })
+}
+
+func simulate_serialize_position(_ simulate : [simulate_t]) -> Shader.Argument {
+	return .floatArray(simulate.flatMap {s in [Float(s.position.x), Float(s.position.y)] })
+}
+
+func simulate_add(_ state : state_t, _ bus : bus_t, _ position : CGPoint) -> state_t {
+	var result = state
+	let delay = Duration.seconds(state.duration / state.speed)
+	result.simulate.append(simulate_t(
+		timestamp : Date.now,
+		mass : state.mass,
+		position : position
+	))
+	bus.publish_delayed(for : delay, schedule : { .simulate_remove })
+	return result
+}
+
+func simulate_remove(_ state : state_t, _ bus : bus_t) -> state_t {
+	var result = state
+	let now = Date.now
+	let delay = state.duration / state.speed
+	result.simulate = result.simulate.filter { s in
+		let elapsed = s.timestamp.distance(to : now)
+		return elapsed < delay
+	}
+	bus.publish(.log("simulate: \(result.simulate)"))
+	return result
 }
 
 func simulation(_ simulate : [simulate_t], _ bodies : [body_t], _ duration : Double, _ dt : Double, _ epsilon : Double, _ speed : Double) -> [simulate_t] {

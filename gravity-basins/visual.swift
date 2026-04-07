@@ -1,7 +1,63 @@
 import SwiftUI
 
+struct visual_t : Equatable {
+	var display_scale : CGFloat
+	var resolution : CGSize
+	var fragment : Image?
+}
+
+func visual_update_check(_ old : state_t, _ new : state_t) -> state_t? {
+	if new.in_motion {
+		return nil
+	}
+	if old.bodies != new.bodies {
+		return new
+	}
+	if old.mass != new.mass {
+		return new
+	}
+	if old.in_motion && !new.in_motion {
+		return new
+	}
+	if old.visual.resolution != new.visual.resolution {
+		return new
+	}
+	return nil
+}
+
+func visual_update_resolution(_ state : state_t, _ display_scale : CGFloat, _ resolution : CGSize) -> state_t {
+	var result = state
+	result.visual.display_scale = display_scale
+	result.visual.resolution = resolution
+	return result
+}
+
+func visual_update_fragments(_ state : state_t) -> state_t {
+	var result = state
+	let visual = state.visual
+	let shader = ShaderLibrary.visual(
+		.float2(visual.resolution),
+		.float2(state.translation),
+		.float(state.magnification),
+		body_serialize_mass(state.bodies),
+		body_serialize_position(state.bodies),
+		body_serialize_color(state.bodies),
+		.float(state.duration),
+		.float(state.dt),
+		.float(state.epsilon),
+		.float(state.mass)
+	)
+	result.visual.fragment = view_to_image(
+		Rectangle()
+			.frame(width : visual.resolution.width, height : visual.resolution.height)
+			.colorEffect(shader),
+		scale : visual.display_scale
+	)
+	return result
+}
+
 @MainActor
-func view_to_image(_ view : some View, scale : CGFloat = 1) -> Image? {
+private func view_to_image(_ view : some View, scale : CGFloat = 1) -> Image? {
 	let renderer = ImageRenderer(content : view)
 
 	renderer.scale = scale
