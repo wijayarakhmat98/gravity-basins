@@ -1,7 +1,5 @@
 import Combine
-import SwiftUI
 
-@Observable
 class bus_t {
 	private let subject = PassthroughSubject<event_t, Never>()
 	private var debounce : [String : Task<Void, Never>] = [:]

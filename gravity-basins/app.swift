@@ -11,7 +11,7 @@ struct app : App {
 	}
 
 	@State private var state_b : box<state_t> = inject_state_b
-	@State private var bus : bus_t = inject_bus
+	private let bus : bus_t = inject_bus
 
 	var body : some Scene {
 		WindowGroup {
