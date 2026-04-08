@@ -5,8 +5,8 @@ func shader_draw_bodies(_ bodies : [body_t], _ camera : camera_t, _ resolution :
 		.float2(resolution),
 		.float2(camera.translation),
 		.float(camera.magnification),
-		serialize_mass(bodies),
 		serialize_position(bodies),
+		serialize_mass(bodies),
 		serialize_color(bodies)
 	)
 }
@@ -20,8 +20,8 @@ func shader_draw_select(_ bodies : [body_t], _ camera : camera_t, _ resolution :
 		.float2(resolution),
 		.float2(camera.translation),
 		.float(camera.magnification),
-		.float(body.mass),
-		.float2(body.position)
+		.float2(body.position),
+		.float(body.mass)
 	)
 }
 
@@ -30,13 +30,13 @@ func shader_visual(_ editor : editor_t, _ bodies : [body_t], _ simulation : simu
 		.float2(visual.resolution),
 		.float2(camera.translation),
 		.float(camera.magnification),
-		serialize_mass(bodies),
+		.float(editor.mass),
 		serialize_position(bodies),
+		serialize_mass(bodies),
 		serialize_color(bodies),
 		.float(simulation.duration),
 		.float(simulation.dt),
-		.float(simulation.epsilon),
-		.float(editor.mass)
+		.float(simulation.epsilon)
 	)
 }
 

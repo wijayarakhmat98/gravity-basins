@@ -28,18 +28,16 @@ func camera_magnify(_ old : camera_t, _ delta : CGFloat, _ editor : editor_t) ->
 	return new
 }
 
-func screen_to_world(_ position : CGPoint, _ resolution : CGSize, _ camera : camera_t) -> CGPoint {
-	let translation = camera.translation
-	let magnification = camera.magnification
-	let x = (translation.x - resolution.width  / 2 + position.x) / magnification
-	let y = (translation.y + resolution.height / 2 - position.y) / magnification
-	return CGPoint(x : x, y : y)
+func screen_to_world(_ screen_position : CGPoint, _ screen_resolution : CGSize, _ camera : camera_t) -> CGPoint {
+	return CGPoint(
+		x : (camera.translation.x - screen_resolution.width  / 2 + screen_position.x) / camera.magnification,
+		y : (camera.translation.y + screen_resolution.height / 2 - screen_position.y) / camera.magnification
+	)
 }
 
-func world_to_screen(_ position : CGPoint, _ resolution : CGSize, _ camera : camera_t) -> CGPoint {
-	let translation = camera.translation
-	let magnification = camera.magnification
-	let x = resolution.width  / 2 - translation.x + position.x * magnification
-	let y = resolution.height / 2 + translation.y - position.y * magnification
-	return CGPoint(x : x, y : y)
+func world_to_screen(_ world_position : CGPoint, _ screen_resolution : CGSize, _ camera : camera_t) -> CGPoint {
+	return CGPoint(
+		x : screen_resolution.width  / 2 - camera.translation.x + world_position.x * camera.magnification,
+		y : screen_resolution.height / 2 + camera.translation.y - world_position.y * camera.magnification
+	)
 }

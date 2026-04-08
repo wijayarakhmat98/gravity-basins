@@ -11,8 +11,8 @@ func element_add(_ old : [body_t], _ editor : editor_t, _ position : CGPoint) ->
 	var new = old
 	new.append(body_t(
 		timestamp : Date.now,
-		mass : editor.mass,
 		position : position,
+		mass : editor.mass,
 		color : editor.color
 	))
 	return new

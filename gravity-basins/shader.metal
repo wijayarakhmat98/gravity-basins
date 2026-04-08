@@ -2,139 +2,194 @@
 
 using namespace metal;
 
-float2 screen_to_world(float2 position, float2 resolution, float2 translation, float magnification) {
-	return float2(
-		(translation.x - resolution.x / 2 + position.x) / magnification,
-		(translation.y + resolution.y / 2 - position.y) / magnification
-	);
-}
+auto screen_to_world(float2 const, float2 const, float2 const, float const) -> float2;
+auto world_to_screen(float2 const, float2 const, float2 const, float const) -> float2;
+auto body_nearest(float2 const, int const, float2 device const*) -> int;
+auto simulate_element(float2, float const, int const, float2 device const*, float device const*, float const, float const, float const) -> float2;
 
-float2 world_to_screen(float2 position, float2 resolution, float2 translation, float magnification) {
-	return float2(
-		resolution.x / 2 - translation.x + position.x * magnification,
-		resolution.y / 2 + translation.y - position.y * magnification
-	);
-}
+[[stitchable]]
+auto draw_bodies(
+	float2 const screen_position,
+	half4 const screen_color,
+	float2 const screen_resolution,
+	float2 const camera_translation,
+	float const camera_magnification,
+	float2 device const* bodies_position,
+	int const,
+	float device const* bodies_mass,
+	int const bodies_n,
+	half4 device const* bodies_color,
+	int const
+)
+-> half4
+{
+	auto const position { screen_to_world(screen_position, screen_resolution, camera_translation, camera_magnification) };
 
-bool in_body(float2 self, int n, device float const* mass, device float2 const* position) {
-	for (int i = 0; i < n; ++i)
-		if (distance(self, position[i]) < mass[i])
-			return true;
-	return false;
-}
+	auto in_body { false };
+	auto color = half3 { 1, 1, 1 };
 
-float2 simulation(float2 self, int n, device float const* mass, device float2 const* position, float duration, float dt, float epsilon, float m) {
-	float2 v = float2(0, 0);
+	for (auto i { 0 }; i < bodies_n; ++i) {
+		auto const body_position { bodies_position[i] };
+		auto const body_mass { bodies_mass[i] };
+		auto const body_color { bodies_color[i] };
+		auto const r { distance(position, body_position) };
 
-	for (float t = 0; t < duration; t += dt) {
-		float2 f_sum = float2(0, 0);
-
-		for (int i = 0; i < n; ++i) {
-			float r = distance(self, position[i]);
-			float f_mag = mass[i] * m / (r * r + epsilon);
-			float2 d = position[i] - self;
-			float2 f = f_mag * (d / r);
-			f_sum += f;
+		if (r < body_mass) {
+			color *= body_color.xyz;
+			in_body = true;
 		}
-
-		float2 a = f_sum / m;
-		v += a * dt;
-
-		self += v * dt;
 	}
 
-	return self;
+	return in_body ? half4(color, 1) : screen_color;
 }
 
-int nearest(float2 self, int n, device float2 const* position) {
-	float nearest_r = INFINITY;
-	int nearest_i = -1;
-	for (int i = 0; i < n; ++i) {
-		float r = distance(self, position[i]);
+[[stitchable]]
+auto draw_select(
+	float2 const screen_position,
+	half4 const screen_color,
+	float2 const screen_resolution,
+	float2 const camera_translation,
+	float const camera_magnification,
+	float2 const body_position,
+	float const body_mass
+)
+-> half4
+{
+	auto const position { screen_to_world(screen_position, screen_resolution, camera_translation, camera_magnification) };
+	auto const r { distance(position, body_position) };
+
+	if (r > body_mass || r < body_mass - 2.5)
+		return screen_color;
+
+	if (r > body_mass - 1.25)
+		return half4(screen_color.xyz / 4 + 0.75, 1);
+
+	return { 0, 0, 0, 1 };
+}
+
+[[stitchable]]
+auto visual(
+	float2 const screen_position,
+	half4 const screen_color,
+	float2 const screen_resolution,
+	float2 const camera_translation,
+	float const camera_magnification,
+	float const mass,
+	float2 device const* bodies_position,
+	int const,
+	float device const* bodies_mass,
+	int const bodies_n,
+	half4 device const* bodies_color,
+	int const,
+	float const duration,
+	float const dt,
+	float const epsilon
+)
+-> half4
+{
+	auto position { screen_to_world(screen_position, screen_resolution, camera_translation, camera_magnification) };
+
+	for (auto i { 0 }; i < bodies_n; ++i) {
+		auto const body_position { bodies_position[i] };
+		auto const body_mass { bodies_mass[i] };
+		auto const r { distance(position, body_position) };
+
+		if (r < body_mass)
+			return screen_color;
+	}
+
+	position = simulate_element(position, mass, bodies_n, bodies_position, bodies_mass, duration, dt, epsilon);
+
+	auto const nearest { body_nearest(position, bodies_n, bodies_position) };
+	auto const color { bodies_color[nearest] };
+
+	return color;
+}
+
+auto screen_to_world(
+	float2 const screen_position,
+	float2 const screen_resolution,
+	float2 const camera_translation,
+	float const camera_magnification
+)
+-> float2
+{
+	return {
+		(camera_translation.x - screen_resolution.x / 2 + screen_position.x) / camera_magnification,
+		(camera_translation.y + screen_resolution.y / 2 - screen_position.y) / camera_magnification
+	};
+}
+
+auto world_to_screen(
+	float2 const world_position,
+	float2 const screen_resolution,
+	float2 const camera_translation,
+	float const camera_magnification
+)
+-> float2
+{
+	return {
+		screen_resolution.x / 2 - camera_translation.x + world_position.x * camera_magnification,
+		screen_resolution.y / 2 + camera_translation.y - world_position.y * camera_magnification
+	};
+}
+
+auto body_nearest(
+	float2 const position,
+	int const bodies_n,
+	float2 device const* bodies_position
+)
+-> int
+{
+	auto nearest_r { INFINITY };
+	auto nearest_i { -1 };
+
+	for (auto i { 0 }; i < bodies_n; ++i) {
+		auto const body_position { bodies_position[i] };
+		auto const r { distance(position, body_position) };
+
 		if (r < nearest_r) {
 			nearest_r = r;
 			nearest_i = i;
 		}
 	}
+
 	return nearest_i;
 }
 
-[[stitchable]] half4 draw_bodies(
-	float2 canvas_position,
-	half4 canvas_color,
-	float2 canvas_resolution,
-	float2 translation,
-	float magnification,
-	device float const* mass,
-	int n,
-	device float2 const* position,
-	int,
-	device half4 const* color,
-	int
-) {
-	float2 self = screen_to_world(canvas_position, canvas_resolution, translation, magnification);
-
-	bool in_planet = false;
-	half3 result = half3(1, 1, 1);
-
-	for (int i = 0; i < n; ++i)
-		if (distance(self, position[i]) < mass[i]) {
-			result *= color[i].xyz;
-			in_planet = true;
-		}
-
-	return in_planet ? half4(result, 1) : canvas_color;
-}
-
-[[stitchable]] half4 draw_select(
-	float2 canvas_position,
-	half4 canvas_color,
-	float2 canvas_resolution,
-	float2 translation,
-	float magnification,
+auto simulate_element(
+	float2 position,
 	float const mass,
-	float2 const position
-) {
-	float2 self = screen_to_world(canvas_position, canvas_resolution, translation, magnification);
+	int const bodies_n,
+	float2 device const* bodies_position,
+	float device const* bodies_mass,
+	float const duration,
+	float const dt,
+	float const epsilon
+)
+-> float2
+{
+	auto velocity = float2 { 0, 0 };
 
-	float d = distance(self, position);
-	if (d < mass) {
-		if (d < mass - 1.25) {
-			if (d < mass - 2.5)
-				return canvas_color;
-			else
-				return half4(0, 0, 0, 1);
-		} else {
-			return half4(canvas_color.xyz / 4 + 0.75, 1);
+	for (auto i { 0 }; i * dt < duration; ++i) {
+		auto f_sum = float2 { 0, 0 };
+
+		for (auto j { 0 }; j < bodies_n; ++j) {
+			auto const body_position { bodies_position[j] };
+			auto const body_mass { bodies_mass[j] };
+
+			auto const d { body_position - position };
+			auto const r { length(d) };
+			auto const f_mag { mass * body_mass / (r * r + epsilon) };
+			auto const f { f_mag * (d / r) };
+
+			f_sum += f;
 		}
+
+		auto const acceleration { f_sum / mass };
+		velocity += acceleration * dt;
+		position += velocity * dt;
 	}
 
-	return canvas_color;
-}
-
-[[stitchable]] half4 visual(
-	float2 canvas_position,
-	half4 canvas_color,
-	float2 canvas_resolution,
-	float2 translation,
-	float magnification,
-	device float const* mass,
-	int n,
-	device float2 const* position,
-	int,
-	device half4 const* color,
-	int,
-	float duration,
-	float dt,
-	float epsilon,
-	float m
-) {
-	float2 self = screen_to_world(canvas_position, canvas_resolution, translation, magnification);
-
-	if (in_body(self, n, mass, position))
-		return canvas_color;
-
-	self = simulation(self, n, mass, position, duration, dt, epsilon, m);
-
-	return color[nearest(self, n, position)];
+	return position;
 }

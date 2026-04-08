@@ -25,8 +25,8 @@ let state_default = state_t(
 	),
 
 	bodies : [
-		body_t(mass : 5, position : CGPoint(x : 0, y :  25), color : color_t(1, 0, 0)),
-		body_t(mass : 5, position : CGPoint(x : 0, y : -25), color : color_t(0, 1, 1))
+		body_t(position : CGPoint(x : 0, y :  25), mass : 5, color : color_t(1, 0, 0)),
+		body_t(position : CGPoint(x : 0, y : -25), mass : 5, color : color_t(0, 1, 1))
 	],
 	elements : [],
 
