@@ -19,10 +19,10 @@ func visual_update(_ old : state_t, _ new : state_t) -> Bool {
 	return false
 }
 
-func visual_resolution(_ old : visual_t, _ display_scale : CGFloat, _ resolution : CGSize) -> visual_t {
+func visual_resolution(_ old : visual_t, _ screen_display_scale : CGFloat, _ screen_resolution : CGSize) -> visual_t {
 	var new = old
-	new.display_scale = display_scale
-	new.resolution = resolution
+	new.display_scale = screen_display_scale
+	new.resolution = screen_resolution
 	return new
 }
 

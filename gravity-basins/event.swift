@@ -7,10 +7,10 @@ enum source_t {
 
 enum event_t {
 	case in_motion(_ in_motion : Bool)
-	case resolution(_ source : source_t, _ display_scale : CGFloat, _ resolution : CGSize)
-	case single_tap(_ source : source_t, _ position : CGPoint, _ resolution : CGSize)
-	case double_tap(_ source : source_t, _ position : CGPoint, _ resolution : CGSize)
-	case drag_start(_ source : source_t, _ position : CGPoint, _ resolution : CGSize)
+	case screen_resolution(_ source : source_t, _ screen_display_scale : CGFloat, _ screen_resolution : CGSize)
+	case single_tap(_ source : source_t, _ screen_position : CGPoint, _ screen_resolution : CGSize)
+	case double_tap(_ source : source_t, _ screen_position : CGPoint, _ screen_resolution : CGSize)
+	case drag_start(_ source : source_t, _ screen_position : CGPoint, _ screen_resolution : CGSize)
 	case drag(_ source : source_t, _ delta : CGSize)
 	case drag_end(_ source : source_t)
 	case magnify(_ source : source_t, _ delta : CGFloat)

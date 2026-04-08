@@ -5,20 +5,20 @@ extension EnvironmentValues {
 }
 
 extension View {
-	func track_resolution(to resolution : Binding<CGSize>, publish source : source_t? = nil) -> some View {
-		self.modifier(modifier_track_resolution(resolution : resolution, source : source))
+	func track_resolution(to screen_resolution : Binding<CGSize>, publish source : source_t? = nil) -> some View {
+		self.modifier(modifier_track_resolution(screen_resolution : screen_resolution, source : source))
 	}
 
-	func publish_single_tap(from source : source_t, with resolution : CGSize) -> some View {
-		self.modifier(modifier_publish_single_tap(source : source, resolution : resolution))
+	func publish_single_tap(from source : source_t, with screen_resolution : CGSize) -> some View {
+		self.modifier(modifier_publish_single_tap(source : source, screen_resolution : screen_resolution))
 	}
 
-	func publish_double_tap(from source : source_t, with resolution : CGSize) -> some View {
-		self.modifier(modifier_publish_double_tap(source : source, resolution : resolution))
+	func publish_double_tap(from source : source_t, with screen_resolution : CGSize) -> some View {
+		self.modifier(modifier_publish_double_tap(source : source, screen_resolution : screen_resolution))
 	}
 
-	func publish_drag(from source : source_t, with resolution : CGSize) -> some View {
-		self.modifier(modifier_publish_drag(source : source, resolution : resolution))
+	func publish_drag(from source : source_t, with screen_resolution : CGSize) -> some View {
+		self.modifier(modifier_publish_drag(source : source, screen_resolution : screen_resolution))
 	}
 
 	func publish_magnify(from source : source_t) -> some View {
@@ -38,7 +38,7 @@ private struct modifier_track_resolution : ViewModifier {
 	@Environment(\.displayScale) private var displayScale
 	@Environment(\.bus) private var bus
 
-	@Binding var resolution : CGSize
+	@Binding var screen_resolution : CGSize
 
 	let source : source_t?
 
@@ -47,9 +47,9 @@ private struct modifier_track_resolution : ViewModifier {
 			for : CGSize.self,
 			of : { proxy in proxy.size },
 			action : { size in
-				resolution = size
+				screen_resolution = size
 				if let source {
-					bus.publish(.resolution(source, displayScale, resolution))
+					bus.publish(.screen_resolution(source, displayScale, screen_resolution))
 				}
 			}
 		)
@@ -60,11 +60,11 @@ private struct modifier_publish_single_tap : ViewModifier {
 	@Environment(\.bus) private var bus
 
 	let source : source_t
-	let resolution : CGSize
+	let screen_resolution : CGSize
 
 	func body(content : Content) -> some View {
 		content.gesture(SpatialTapGesture(count : 1).onEnded { event in
-			bus.publish(.single_tap(source, event.location, resolution))
+			bus.publish(.single_tap(source, event.location, screen_resolution))
 		})
 	}
 }
@@ -73,11 +73,11 @@ private struct modifier_publish_double_tap : ViewModifier {
 	@Environment(\.bus) private var bus
 
 	let source : source_t
-	let resolution : CGSize
+	let screen_resolution : CGSize
 
 	func body(content : Content) -> some View {
 		content.gesture(SpatialTapGesture(count : 2).onEnded { event in
-			bus.publish(.double_tap(source, event.location, resolution))
+			bus.publish(.double_tap(source, event.location, screen_resolution))
 		})
 	}
 }
@@ -89,14 +89,14 @@ private struct modifier_publish_drag : ViewModifier {
 	@State private var translation : CGSize = .zero
 
 	let source : source_t
-	let resolution : CGSize
+	let screen_resolution : CGSize
 
 	func body(content : Content) -> some View {
 		content.gesture(DragGesture()
 			.onChanged { event in
 				if !start {
 					start = true
-					bus.publish(.drag_start(source, event.startLocation, resolution))
+					bus.publish(.drag_start(source, event.startLocation, screen_resolution))
 				}
 				let delta = CGSize(
 					width : event.translation.width - translation.width,

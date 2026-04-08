@@ -6,17 +6,17 @@ func dispatch(_ old : state_t, _ bus : bus_t, _ event : event_t) -> state_t {
 		case .in_motion(let in_motion):
 			process_in_motion(old, in_motion)
 
-		case .resolution(let source, let display_scale, let resolution):
-			process_resolution(old, bus, source, display_scale, resolution)
+		case .screen_resolution(let source, let screen_display_scale, let screen_resolution):
+			process_screen_resolution(old, bus, source, screen_display_scale, screen_resolution)
 
-		case .single_tap(let source, let position, let resolution):
-			process_single_tap(old, bus, source, position, resolution)
+		case .single_tap(let source, let screen_position, let screen_resolution):
+			process_single_tap(old, bus, source, screen_position, screen_resolution)
 
-		case .double_tap(_, let position, let resolution):
-			process_double_tap(old, position, resolution)
+		case .double_tap(_, let screen_position, let screen_resolution):
+			process_double_tap(old, screen_position, screen_resolution)
 
-		case .drag_start(let source, let position, let resolution):
-			process_drag_start(old, source, position, resolution)
+		case .drag_start(let source, let screen_position, let screen_resolution):
+			process_drag_start(old, source, screen_position, screen_resolution)
 
 		case .drag(let source, let delta):
 			process_drag(old, source, delta)
@@ -48,12 +48,12 @@ private func process_in_motion(_ old : state_t, _ in_motion : Bool) -> state_t {
 	return new
 }
 
-private func process_resolution(_ old : state_t, _ bus : bus_t, _ source : source_t, _ display_scale : CGFloat, _ resolution : CGSize) -> state_t {
+private func process_screen_resolution(_ old : state_t, _ bus : bus_t, _ source : source_t, _ screen_display_scale : CGFloat, _ screen_resolution : CGSize) -> state_t {
 	let visual = old.visual
 	var new = old
 	if source == .visual {
 		new.editor.in_motion = true
-		new.visual = visual_resolution(visual, display_scale, resolution)
+		new.visual = visual_resolution(visual, screen_display_scale, screen_resolution)
 		bus.publish_debounce(
 			id : "in_motion",
 			for : .nanoseconds(100_000_000),
@@ -63,13 +63,13 @@ private func process_resolution(_ old : state_t, _ bus : bus_t, _ source : sourc
 	return new
 }
 
-private func process_single_tap(_ old : state_t, _ bus : bus_t, _ source : source_t, _ position : CGPoint, _ resolution : CGSize) -> state_t {
+private func process_single_tap(_ old : state_t, _ bus : bus_t, _ source : source_t, _ screen_position : CGPoint, _ screen_resolution : CGSize) -> state_t {
 	let editor = old.editor
 	let elements = old.elements
 	let simulation = old.simulation
 	let bodies = old.bodies
 	let camera = old.camera
-	let world_position = screen_to_world(position, resolution, camera)
+	let world_position = screen_to_world(screen_position, screen_resolution, camera)
 	let select = body_select(bodies, world_position)
 	var new = old
 	if source == .visual && select == nil {
@@ -82,10 +82,10 @@ private func process_single_tap(_ old : state_t, _ bus : bus_t, _ source : sourc
 	return new
 }
 
-private func process_double_tap(_ old : state_t, _ position : CGPoint, _ resolution : CGSize) -> state_t {
+private func process_double_tap(_ old : state_t, _ screen_position : CGPoint, _ screen_resolution : CGSize) -> state_t {
 	let bodies = old.bodies
 	let camera = old.camera
-	let world_position = screen_to_world(position, resolution, camera)
+	let world_position = screen_to_world(screen_position, screen_resolution, camera)
 	var new = old
 	if let i = body_select(bodies, world_position) {
 		new.bodies = body_remove(bodies, i)
@@ -96,12 +96,12 @@ private func process_double_tap(_ old : state_t, _ position : CGPoint, _ resolut
 	return new
 }
 
-private func process_drag_start(_ old : state_t, _ source : source_t, _ position : CGPoint, _ resolution : CGSize) -> state_t {
+private func process_drag_start(_ old : state_t, _ source : source_t, _ screen_position : CGPoint, _ screen_resolution : CGSize) -> state_t {
 	let bodies = old.bodies
 	let camera = old.camera
 	var new = old
 	if source == .editor {
-		let world_position = screen_to_world(position, resolution, camera)
+		let world_position = screen_to_world(screen_position, screen_resolution, camera)
 		new.editor.in_motion = true
 		new.editor.select_drag = body_select(bodies, world_position)
 	}

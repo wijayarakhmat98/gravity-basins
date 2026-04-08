@@ -1,8 +1,8 @@
 import SwiftUI
 
-func shader_draw_bodies(_ bodies : [body_t], _ camera : camera_t, _ resolution : CGSize) -> Shader {
+func shader_draw_bodies(_ bodies : [body_t], _ camera : camera_t, _ screen_resolution : CGSize) -> Shader {
 	return ShaderLibrary.draw_bodies(
-		.float2(resolution),
+		.float2(screen_resolution),
 		.float2(camera.translation),
 		.float(camera.magnification),
 		serialize_position(bodies),
@@ -11,13 +11,13 @@ func shader_draw_bodies(_ bodies : [body_t], _ camera : camera_t, _ resolution :
 	)
 }
 
-func shader_draw_select(_ bodies : [body_t], _ camera : camera_t, _ resolution : CGSize, _ i : Int?) -> Shader? {
+func shader_draw_select(_ bodies : [body_t], _ camera : camera_t, _ screen_resolution : CGSize, _ i : Int?) -> Shader? {
 	guard let i else {
 		return nil
 	}
 	let body = bodies[i]
 	return ShaderLibrary.draw_select(
-		.float2(resolution),
+		.float2(screen_resolution),
 		.float2(camera.translation),
 		.float(camera.magnification),
 		.float2(body.position),

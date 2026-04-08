@@ -89,7 +89,7 @@ private struct view_toolbar : View {
 private struct view_editor : View {
 	@Environment(\.state_b) private var state_b
 
-	@State private var resolution : CGSize = .zero
+	@State private var screen_resolution : CGSize = .zero
 
 	var body : some View {
 		let state = state_b.value
@@ -99,20 +99,20 @@ private struct view_editor : View {
 		let camera = state.camera
 		Rectangle()
 			.fill(.black)
-			.track_resolution(to : $resolution)
-			.publish_double_tap(from : .editor, with : resolution)
-			.publish_single_tap(from : .editor, with : resolution)
-			.publish_drag(from : .editor, with : resolution)
+			.track_resolution(to : $screen_resolution)
+			.publish_double_tap(from : .editor, with : screen_resolution)
+			.publish_single_tap(from : .editor, with : screen_resolution)
+			.publish_drag(from : .editor, with : screen_resolution)
 			.publish_magnify(from : .editor)
-			.apply_shader(shader_draw_bodies(bodies, camera, resolution))
-			.apply_shader(shader_draw_select(bodies, camera, resolution, select))
+			.apply_shader(shader_draw_bodies(bodies, camera, screen_resolution))
+			.apply_shader(shader_draw_select(bodies, camera, screen_resolution, select))
 	}
 }
 
 private struct view_simulate : View {
 	@Environment(\.state_b) private var state_b
 
-	@State private var resolution : CGSize = .zero
+	@State private var screen_resolution : CGSize = .zero
 
 	var body : some View {
 		TimelineView(.animation) { tl in
@@ -124,14 +124,14 @@ private struct view_simulate : View {
 			let elements = simulate_elements(state.elements, state.bodies, state.simulation)
 			Rectangle()
 				.fill(.black)
-				.track_resolution(to : $resolution)
-				.publish_double_tap(from : .editor, with : resolution)
-				.publish_single_tap(from : .editor, with : resolution)
-				.publish_drag(from : .editor, with : resolution)
+				.track_resolution(to : $screen_resolution)
+				.publish_double_tap(from : .editor, with : screen_resolution)
+				.publish_single_tap(from : .editor, with : screen_resolution)
+				.publish_drag(from : .editor, with : screen_resolution)
 				.publish_magnify(from : .editor)
-				.apply_shader(shader_draw_bodies(bodies, camera, resolution))
-				.apply_shader(shader_draw_select(bodies, camera, resolution, select))
-				.apply_shader(shader_draw_bodies(elements, camera, resolution))
+				.apply_shader(shader_draw_bodies(bodies, camera, screen_resolution))
+				.apply_shader(shader_draw_select(bodies, camera, screen_resolution, select))
+				.apply_shader(shader_draw_bodies(elements, camera, screen_resolution))
 		}
 	}
 }
@@ -139,14 +139,14 @@ private struct view_simulate : View {
 private struct view_visual : View {
 	@Environment(\.state_b) private var state_b
 
-	@State private var resolution : CGSize = .zero
+	@State private var screen_resolution : CGSize = .zero
 
 	var body : some View {
 		Rectangle()
 			.fill(.black)
-			.track_resolution(to : $resolution, publish : .visual)
+			.track_resolution(to : $screen_resolution, publish : .visual)
 			.overlay_fragment(state_b.value.visual)
-			.publish_double_tap(from : .visual, with : resolution)
-			.publish_single_tap(from : .visual, with : resolution)
+			.publish_double_tap(from : .visual, with : screen_resolution)
+			.publish_single_tap(from : .visual, with : screen_resolution)
 	}
 }
