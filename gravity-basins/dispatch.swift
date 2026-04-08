@@ -173,12 +173,12 @@ private func process_element_remove(_ old : state_t) -> state_t {
 }
 
 private func process_visual_update(_ old : state_t) -> state_t {
+	let editor = old.editor
+	let bodies = old.bodies
+	let simulation = old.simulation
+	let camera = old.camera
+	let visual = old.visual
 	var new = old
-	let editor = new.editor
-	let bodies = new.bodies
-	let simulation = new.simulation
-	let camera = new.camera
-	let visual = new.visual
 	new.visual = visual_fragment(editor, bodies, simulation, camera, visual)
 	return new
 }
