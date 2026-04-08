@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct visual_t : Equatable {
+struct visual_t : Equatable, destructurable {
 	var display_scale : CGFloat
 	var resolution : CGSize
 	var fragment : Image?
@@ -20,22 +20,23 @@ func visual_update(_ old : state_t, _ new : state_t) -> Bool {
 }
 
 func visual_resolution(_ old : visual_t, _ screen_display_scale : CGFloat, _ screen_resolution : CGSize) -> visual_t {
-	var new = old
-	new.display_scale = screen_display_scale
-	new.resolution = screen_resolution
-	return new
+	(old)~>{ new in
+		new.display_scale = screen_display_scale
+		new.resolution = screen_resolution
+	}
 }
 
-func visual_fragment(_ editor : editor_t, _ bodies : [body_t], _ simulation : simulation_t, _ camera : camera_t, _ visual : visual_t) -> visual_t {
-	let shader = shader_visual(editor, bodies, simulation, camera, visual)
-	var new = visual
-	new.fragment = view_to_image(
-		Rectangle()
-			.frame(width : visual.resolution.width, height : visual.resolution.height)
-			.colorEffect(shader),
-		scale : visual.display_scale
-	)
-	return new
+func visual_fragment(_ old : state_t) -> visual_t {
+	(old.visual)~>{ new in
+		let (display_scale, resolution) = (old)~>(\.visual.display_scale, \.visual.resolution)
+		let shader = shader_visual(old)
+		new.fragment = view_to_image(
+			Rectangle()
+				.frame(width : resolution.width, height : resolution.height)
+				.colorEffect(shader),
+			scale : display_scale
+		)
+	}
 }
 
 @MainActor

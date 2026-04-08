@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct simulation_t : Equatable {
+struct simulation_t : Equatable, destructurable {
 	let duration : Double
 	let dt : Double
 	let epsilon : Double
@@ -8,14 +8,14 @@ struct simulation_t : Equatable {
 }
 
 func element_add(_ old : [body_t], _ editor : editor_t, _ position : CGPoint) -> [body_t] {
-	var new = old
-	new.append(body_t(
-		timestamp : Date.now,
-		position : position,
-		mass : editor.mass,
-		color : editor.color
-	))
-	return new
+	(old)~>{ new in
+		new.append(body_t(
+			timestamp : Date.now,
+			position : position,
+			mass : editor.mass,
+			color : editor.color
+		))
+	}
 }
 
 func element_remove(_ elements : [body_t], _ simulation : simulation_t) -> [body_t] {
@@ -28,21 +28,22 @@ func element_remove(_ elements : [body_t], _ simulation : simulation_t) -> [body
 }
 
 func simulate_element(
-	_ element : body_t,
+	_ old : body_t,
 	_ bodies : [body_t],
 	_ simulation : simulation_t,
 	_ now : Date = .now
 )
 -> body_t
 {
-	var px = element.position.x
-	var py = element.position.y
+	var px = old.position.x
+	var py = old.position.y
 	var vx : Double = 0
 	var vy : Double = 0
 
-	let elapsed = element.timestamp.distance(to : now) * simulation.speed
+	let mass = old.mass
+	let elapsed = old.timestamp.distance(to : now) * simulation.speed
 
-		for _ in stride(from : 0, to : elapsed, by : simulation.dt) {
+	for _ in stride(from : 0, to : elapsed, by : simulation.dt) {
 		var fx_sum : Double = 0
 		var fy_sum : Double = 0
 
@@ -50,24 +51,24 @@ func simulate_element(
 			let dx = body.position.x - px
 			let dy = body.position.y - py
 			let r = hypot(dx, dy)
-			let f_mag = body.mass * element.mass / (r * r + simulation.epsilon)
+			let f_mag = mass * body.mass / (r * r + simulation.epsilon)
 			let fx = f_mag * (dx / r)
 			let fy = f_mag * (dy / r)
 			fx_sum += fx
 			fy_sum += fy
 		}
 
-		let ax = fx_sum / element.mass
-		let ay = fy_sum / element.mass
+		let ax = fx_sum / mass
+		let ay = fy_sum / mass
 		vx += ax * simulation.dt
 		vy += ay * simulation.dt
 		px += vx * simulation.dt
 		py += vy * simulation.dt
 	}
 
-	var result = element
-	result.position = CGPoint(x : px, y : py)
-	return result
+	return (old)~>{ new in
+		new.position = CGPoint(x : px, y : py)
+	}
 }
 
 func simulate_elements(
@@ -78,7 +79,7 @@ func simulate_elements(
 )
 -> [body_t]
 {
-	return elements.map { element in
+	elements.map { element in
 		simulate_element(element, bodies, simulation, now)
 	}
 }

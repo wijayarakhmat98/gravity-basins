@@ -1,7 +1,7 @@
 import SwiftUI
 
 func shader_draw_bodies(_ bodies : [body_t], _ camera : camera_t, _ screen_resolution : CGSize) -> Shader {
-	return ShaderLibrary.draw_bodies(
+	ShaderLibrary.draw_bodies(
 		.float2(screen_resolution),
 		.float2(camera.translation),
 		.float(camera.magnification),
@@ -25,7 +25,8 @@ func shader_draw_select(_ bodies : [body_t], _ camera : camera_t, _ screen_resol
 	)
 }
 
-func shader_visual(_ editor : editor_t, _ bodies : [body_t], _ simulation : simulation_t, _ camera : camera_t, _ visual : visual_t) -> Shader {
+func shader_visual(_ state : state_t) -> Shader {
+	let (editor, bodies, simulation, camera, visual) = (state)~>(\.editor, \.bodies, \.simulation, \.camera, \.visual)
 	return ShaderLibrary.visual(
 		.float2(visual.resolution),
 		.float2(camera.translation),
@@ -41,15 +42,15 @@ func shader_visual(_ editor : editor_t, _ bodies : [body_t], _ simulation : simu
 }
 
 private func serialize_mass(_ bodies : [body_t]) -> Shader.Argument {
-	return .floatArray(bodies.map {body in Float(body.mass) })
+	.floatArray(bodies.map { body in Float(body.mass) })
 }
 
 private func serialize_position(_ bodies : [body_t]) -> Shader.Argument {
-	return .floatArray(bodies.flatMap {body in [Float(body.position.x), Float(body.position.y)] })
+	.floatArray(bodies.flatMap { body in [Float(body.position.x), Float(body.position.y)] })
 }
 
 private func serialize_color(_ bodies : [body_t]) -> Shader.Argument {
-	return .colorArray(bodies.map {body in
+	.colorArray(bodies.map { body in
 		let color = body.color
 		return Color(red : color.red, green : color.green, blue : color.blue)
 	})

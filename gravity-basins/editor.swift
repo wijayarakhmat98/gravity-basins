@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct editor_t : Equatable {
+struct editor_t : Equatable, destructurable {
 	let magnification_min : CGFloat
 	let magnification_max : CGFloat
 

@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct state_t : Equatable {
+struct state_t : Equatable, destructurable {
 	var editor : editor_t
 	var bodies : [body_t]
 	var elements : [body_t]

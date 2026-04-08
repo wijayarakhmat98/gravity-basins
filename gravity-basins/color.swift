@@ -1,4 +1,4 @@
-struct color_t : Equatable {
+struct color_t : Equatable, destructurable {
 	var red : Double
 	var green : Double
 	var blue : Double
