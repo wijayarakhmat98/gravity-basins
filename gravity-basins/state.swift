@@ -21,6 +21,8 @@ let state_default = state_t(
 
 		select : nil,
 		select_drag : nil,
+
+		debounce_duration : .nanoseconds(100_000_000),
 		in_motion : false
 	),
 

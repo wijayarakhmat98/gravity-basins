@@ -11,5 +11,7 @@ struct editor_t : Equatable {
 
 	var select : Int?
 	var select_drag : Int?
+
+	let debounce_duration : Duration
 	var in_motion : Bool
 }

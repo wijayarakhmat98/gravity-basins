@@ -49,6 +49,7 @@ private func process_in_motion(_ old : state_t, _ in_motion : Bool) -> state_t {
 }
 
 private func process_screen_resolution(_ old : state_t, _ bus : bus_t, _ source : source_t, _ screen_display_scale : CGFloat, _ screen_resolution : CGSize) -> state_t {
+	let editor = old.editor
 	let visual = old.visual
 	var new = old
 	if source == .visual {
@@ -56,7 +57,7 @@ private func process_screen_resolution(_ old : state_t, _ bus : bus_t, _ source 
 		new.visual = visual_resolution(visual, screen_display_scale, screen_resolution)
 		bus.publish_debounce(
 			id : "in_motion",
-			for : .nanoseconds(100_000_000),
+			for : editor.debounce_duration,
 			schedule : { .in_motion(false) }
 		)
 	}
@@ -157,7 +158,7 @@ private func process_body_modify(_ old : state_t, _ bus : bus_t, _ mass : Double
 	new.bodies = body_modify(bodies, select, mass, color)
 	bus.publish_debounce(
 		id : "in_motion",
-		for : .nanoseconds(100_000_000),
+		for : editor.debounce_duration,
 		schedule : { .in_motion(false) }
 	)
 	return new
