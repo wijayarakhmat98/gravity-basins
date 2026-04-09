@@ -138,8 +138,7 @@ private func process_drag(
 -> state_t
 {
 	(old)~>{ new in
-		let (editor, bodies, camera) = (old)~>(\.editor, \.bodies, \.camera)
-		let select_drag = (editor)~>(\.select_drag)
+		let (select_drag, bodies, camera) = (old)~>(\.editor.select_drag, \.bodies, \.camera)
 		if source == .editor {
 			new.editor.in_motion = true
 			if select_drag == nil {

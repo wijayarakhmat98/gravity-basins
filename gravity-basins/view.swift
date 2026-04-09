@@ -1,5 +1,27 @@
 import SwiftUI
 
+extension View {
+	func modify<T : View>(@ViewBuilder _ transform : (Self) -> T) -> some View {
+		transform(self)
+	}
+
+	@ViewBuilder
+	func modify_if<T : View>(_ predicate : Bool, @ViewBuilder _ transform : (Self) -> T) -> some View {
+		if predicate {
+			transform(self)
+		}
+		else { self }
+	}
+
+	@ViewBuilder
+	func modify_if_let<U, T : View>(_ predicate : U?, @ViewBuilder _ transform : (Self, U) -> T) -> some View {
+		if let predicate {
+			transform(self, predicate)
+		}
+		else { self }
+	}
+}
+
 extension EnvironmentValues {
 	@Entry var bus = bus_t()
 }
@@ -23,14 +45,6 @@ extension View {
 
 	func publish_magnify(from source : source_t) -> some View {
 		self.modifier(modifier_publish_magnify(source : source))
-	}
-
-	func apply_shader(_ shader : Shader?) -> some View {
-		self.modifier(modifier_apply_shader(shader : shader))
-	}
-
-	func overlay_fragment(_ visual : visual_t) -> some View {
-		self.modifier(modifier_overlay_fragment(visual : visual))
 	}
 }
 
@@ -133,29 +147,5 @@ private struct modifier_publish_magnify : ViewModifier {
 				bus.publish(.magnify_end(source))
 			}
 		)
-	}
-}
-
-private struct modifier_apply_shader : ViewModifier {
-	let shader : Shader?
-
-	func body(content : Content) -> some View {
-		if let shader {
-			content.colorEffect(shader)
-		} else {
-			content
-		}
-	}
-}
-
-private struct modifier_overlay_fragment : ViewModifier {
-	let visual : visual_t
-
-	func body(content : Content) -> some View {
-		if let fragment = visual.fragment {
-			content.overlay(fragment)
-		} else {
-			content
-		}
 	}
 }

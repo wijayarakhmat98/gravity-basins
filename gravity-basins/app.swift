@@ -32,16 +32,10 @@ private struct view : View {
 	@Environment(\.state_b) private var state_b
 
 	var body : some View {
-		let state = state_b.value
-		return VStack(spacing : 16) {
+		VStack(spacing : 16) {
 			HStack(spacing : 16) {
-				if state.elements.count > 0 {
-					view_simulate()
-						.clipShape(RoundedRectangle(cornerRadius : 16))
-				} else {
-					view_editor()
-						.clipShape(RoundedRectangle(cornerRadius : 16))
-				}
+				view_editor()
+					.clipShape(RoundedRectangle(cornerRadius : 16))
 				view_visual()
 					.clipShape(RoundedRectangle(cornerRadius : 16))
 			}
@@ -55,19 +49,67 @@ private struct view : View {
 	}
 }
 
+private struct view_editor : View {
+	@Environment(\.state_b) private var state_b
+
+	@State private var screen_resolution : CGSize = .zero
+
+	var body : some View {
+		let (select, bodies, elements, simulation,camera) = (state_b.value)~>(\.editor.select, \.bodies, \.elements, \.simulation, \.camera)
+		let draw_bodies = shader_draw_bodies(bodies, camera, screen_resolution)
+		let draw_select = shader_draw_select(bodies, camera, screen_resolution, select)
+		Group {
+			Color.black
+				.modify { content in
+					content.colorEffect(draw_bodies)
+				}
+				.modify_if_let(draw_select) { content, draw_select in
+					content.colorEffect(draw_select)
+				}
+				.modify_if(elements.count > 0) { content in
+					TimelineView(.animation) { _ in
+						let elements = simulate_elements(elements, bodies, simulation)
+						let draw_elements = shader_draw_bodies(elements, camera, screen_resolution)
+						content.colorEffect(draw_elements)
+					}
+				}
+		}
+		.track_resolution(to : $screen_resolution)
+		.publish_double_tap(from : .editor, with : screen_resolution)
+		.publish_single_tap(from : .editor, with : screen_resolution)
+		.publish_drag(from : .editor, with : screen_resolution)
+		.publish_magnify(from : .editor)
+	}
+}
+
+private struct view_visual : View {
+	@Environment(\.state_b) private var state_b
+
+	@State private var screen_resolution : CGSize = .zero
+
+	var body : some View {
+		let fragment = state_b.value.visual.fragment
+		Group {
+			Color.black
+				.modify_if(fragment != nil) { content in
+					content.overlay(fragment)
+				}
+		}
+		.track_resolution(to : $screen_resolution, publish : .visual)
+		.publish_single_tap(from : .visual, with : screen_resolution)
+	}
+}
+
 private struct view_toolbar : View {
 	@Environment(\.state_b) private var state_b
 	@Environment(\.bus) private var bus
 
-	@State private var red : Double = 0
-
 	var body : some View {
 		let state = state_b.value
 		HStack(spacing : 0) {
-			let editor = state.editor
-			if let i = editor.select {
+			let (min, max, i) = (state.editor)~>(\.mass_min, \.mass_max, \.select)
+			if let i {
 				let (m, r, g, b) = (state.bodies[i])~>(\.mass, \.color.red, \.color.green, \.color.blue)
-				let (min, max) = (state.editor)~>(\.mass_min, \.mass_max)
 				Spacer(minLength : 32)
 				Text("Mass:")
 				Slider(value : Binding( get : { m }, set : { m in bus.publish(.body_modify(m, color_t(r, g, b))) }), in : min...max)
@@ -83,70 +125,5 @@ private struct view_toolbar : View {
 				Spacer(minLength : 32)
 			}
 		}
-	}
-}
-
-private struct view_editor : View {
-	@Environment(\.state_b) private var state_b
-
-	@State private var screen_resolution : CGSize = .zero
-
-	var body : some View {
-		let state = state_b.value
-		let editor = state.editor
-		let select = editor.select
-		let bodies = state.bodies
-		let camera = state.camera
-		Rectangle()
-			.fill(.black)
-			.track_resolution(to : $screen_resolution)
-			.publish_double_tap(from : .editor, with : screen_resolution)
-			.publish_single_tap(from : .editor, with : screen_resolution)
-			.publish_drag(from : .editor, with : screen_resolution)
-			.publish_magnify(from : .editor)
-			.apply_shader(shader_draw_bodies(bodies, camera, screen_resolution))
-			.apply_shader(shader_draw_select(bodies, camera, screen_resolution, select))
-	}
-}
-
-private struct view_simulate : View {
-	@Environment(\.state_b) private var state_b
-
-	@State private var screen_resolution : CGSize = .zero
-
-	var body : some View {
-		TimelineView(.animation) { tl in
-			let state = state_b.value
-			let editor = state.editor
-			let select = editor.select
-			let bodies = state.bodies
-			let camera = state.camera
-			let elements = simulate_elements(state.elements, state.bodies, state.simulation)
-			Rectangle()
-				.fill(.black)
-				.track_resolution(to : $screen_resolution)
-				.publish_double_tap(from : .editor, with : screen_resolution)
-				.publish_single_tap(from : .editor, with : screen_resolution)
-				.publish_drag(from : .editor, with : screen_resolution)
-				.publish_magnify(from : .editor)
-				.apply_shader(shader_draw_bodies(bodies, camera, screen_resolution))
-				.apply_shader(shader_draw_select(bodies, camera, screen_resolution, select))
-				.apply_shader(shader_draw_bodies(elements, camera, screen_resolution))
-		}
-	}
-}
-
-private struct view_visual : View {
-	@Environment(\.state_b) private var state_b
-
-	@State private var screen_resolution : CGSize = .zero
-
-	var body : some View {
-		Rectangle()
-			.fill(.black)
-			.track_resolution(to : $screen_resolution, publish : .visual)
-			.overlay_fragment(state_b.value.visual)
-			.publish_double_tap(from : .visual, with : screen_resolution)
-			.publish_single_tap(from : .visual, with : screen_resolution)
 	}
 }

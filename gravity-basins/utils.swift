@@ -2,10 +2,6 @@ protocol destructurable {}
 
 infix operator ~>
 
-func ~> <U : destructurable, T>(object : U, k : KeyPath<U, T>) -> T {
-	object[keyPath : k]
-}
-
 func ~> <U : destructurable, each T>(object : U, k : (repeat KeyPath<U, each T>)) -> (repeat each T) {
 	(repeat object[keyPath : each k])
 }
