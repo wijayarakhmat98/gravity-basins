@@ -40,6 +40,7 @@ func dispatch(_ old : state_t, _ bus : bus_t, _ event : event_t) -> state_t {
 		if visual_update(old, new) {
 			new = process_visual_update(new)
 		}
+		new = process_elements_update(old, new)
 	}
 }
 
@@ -125,7 +126,11 @@ private func process_drag_start(
 		if source == .editor {
 			let world_position = screen_to_world(screen_position, screen_resolution, camera)
 			new.editor.in_motion = true
-			new.editor.select_drag = body_select(bodies, world_position)
+			let select_drag = body_select(bodies, world_position)
+			if let select_drag {
+				new.editor.select = select_drag
+			}
+			new.editor.select_drag = select_drag
 		}
 	}
 }
@@ -204,5 +209,18 @@ private func process_element_remove(_ old : state_t) -> state_t {
 private func process_visual_update(_ old : state_t) -> state_t {
 	(old)~>{ new in
 		new.visual = visual_fragment(old)
+	}
+}
+
+private func process_elements_update(_ old : state_t, _ new : state_t) -> state_t {
+	let old_mass = old.bodies.map { body in body.mass }
+	let old_position = old.bodies.map { body in body.position }
+	let new_mass = new.bodies.map { body in body.mass }
+	let new_position = new.bodies.map { body in body.position }
+	if old_mass == new_mass && old_position == new_position {
+		return new
+	}
+	return (new)~>{ new in
+		new.elements = []
 	}
 }
