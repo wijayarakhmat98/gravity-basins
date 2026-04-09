@@ -66,20 +66,20 @@ private struct view_toolbar : View {
 		HStack(spacing : 0) {
 			let editor = state.editor
 			if let i = editor.select {
-				let body = state.bodies[i]
-				let color = body.color
+				let (m, r, g, b) = (state.bodies[i])~>(\.mass, \.color.red, \.color.green, \.color.blue)
+				let (min, max) = (state.editor)~>(\.mass_min, \.mass_max)
 				Spacer(minLength : 32)
 				Text("Mass:")
-				Slider(value : Binding( get : { body.mass }, set : { mass in bus.publish(.body_modify(mass, color_t(color.red, color.green, color.blue))) }), in : editor.mass_min...editor.mass_max)
+				Slider(value : Binding( get : { m }, set : { m in bus.publish(.body_modify(m, color_t(r, g, b))) }), in : min...max)
 				Spacer(minLength : 32)
 				Text("Red:")
-				Slider(value : Binding( get : { color.red }, set : { red in bus.publish(.body_modify(body.mass, color_t(red, color.green, color.blue))) }), in : 0...1)
+				Slider(value : Binding( get : { r }, set : { r in bus.publish(.body_modify(m, color_t(r, g, b))) }), in : 0...1)
 				Spacer(minLength : 32)
 				Text("Green:")
-				Slider(value : Binding( get : { color.green }, set : { green in bus.publish(.body_modify(body.mass, color_t(color.red, green, color.blue))) }), in : 0...1)
+				Slider(value : Binding( get : { g }, set : { g in bus.publish(.body_modify(m, color_t(r, g, b))) }), in : 0...1)
 				Spacer(minLength : 32)
 				Text("Blue:")
-				Slider(value : Binding( get : { color.blue }, set : { blue in bus.publish(.body_modify(body.mass, color_t(color.red, color.green, blue))) }), in : 0...1)
+				Slider(value : Binding( get : { b }, set : { b in bus.publish(.body_modify(m, color_t(r, g, b))) }), in : 0...1)
 				Spacer(minLength : 32)
 			}
 		}
