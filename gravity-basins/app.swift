@@ -35,10 +35,8 @@ private struct view : View {
 		VStack(spacing : 16) {
 			HStack(spacing : 16) {
 				view_editor()
-					.track_resolution()
 					.clipShape(RoundedRectangle(cornerRadius : 16))
 				view_visual()
-					.track_resolution(publish : .visual)
 					.clipShape(RoundedRectangle(cornerRadius : 16))
 			}
 			view_toolbar()
@@ -53,48 +51,50 @@ private struct view : View {
 
 private struct view_editor : View {
 	@Environment(\.state_b) private var state_b
-	@Environment(\.screen_resolution) private var screen_resolution
 
 	var body : some View {
-		let (select, bodies, elements, simulation,camera) = (state_b.value)~>(\.editor.select, \.bodies, \.elements, \.simulation, \.camera)
-		let draw_bodies = shader_draw_bodies(bodies, camera, screen_resolution)
-		let draw_select = shader_draw_select(bodies, camera, screen_resolution, select)
-		Group {
-			Color.black
-				.modify { content in
-					content.colorEffect(draw_bodies)
-				}
-				.modify_if_let(draw_select) { content, draw_select in
-					content.colorEffect(draw_select)
-				}
-				.modify_if(elements.count > 0) { content in
-					TimelineView(.animation) { _ in
-						let elements = simulate_elements(elements, bodies, simulation)
-						let draw_elements = shader_draw_bodies(elements, camera, screen_resolution)
-						content.colorEffect(draw_elements)
+		track_resolution { screen_resolution in
+			let (select, bodies, elements, simulation,camera) = (state_b.value)~>(\.editor.select, \.bodies, \.elements, \.simulation, \.camera)
+			let draw_bodies = shader_draw_bodies(bodies, camera, screen_resolution)
+			let draw_select = shader_draw_select(bodies, camera, screen_resolution, select)
+			Group {
+				Color.black
+					.modify { content in
+						content.colorEffect(draw_bodies)
 					}
-				}
+					.modify_if_let(draw_select) { content, draw_select in
+						content.colorEffect(draw_select)
+					}
+					.modify_if(elements.count > 0) { content in
+						TimelineView(.animation) { _ in
+							let elements = simulate_elements(elements, bodies, simulation)
+							let draw_elements = shader_draw_bodies(elements, camera, screen_resolution)
+							content.colorEffect(draw_elements)
+						}
+					}
+			}
+			.publish_double_tap(from : .editor)
+			.publish_single_tap(from : .editor)
+			.publish_drag(from : .editor)
+			.publish_magnify(from : .editor)
 		}
-		.publish_double_tap(from : .editor)
-		.publish_single_tap(from : .editor)
-		.publish_drag(from : .editor)
-		.publish_magnify(from : .editor)
 	}
 }
 
 private struct view_visual : View {
 	@Environment(\.state_b) private var state_b
-	@Environment(\.screen_resolution) private var screen_resolution
 
 	var body : some View {
-		let fragment = state_b.value.visual.fragment
-		Group {
-			Color.black
-				.modify_if(fragment != nil) { content in
-					content.overlay(fragment)
-				}
+		track_resolution(publish : .visual) { _ in
+			let fragment = state_b.value.visual.fragment
+			Group {
+				Color.black
+					.modify_if(fragment != nil) { content in
+						content.overlay(fragment)
+					}
+			}
+			.publish_single_tap(from : .visual)
 		}
-		.publish_single_tap(from : .visual)
 	}
 }
 

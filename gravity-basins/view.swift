@@ -1,5 +1,9 @@
 import SwiftUI
 
+extension EnvironmentValues {
+	@Entry var bus = bus_t()
+}
+
 extension View {
 	func modify<T : View>(@ViewBuilder _ transform : (Self) -> T) -> some View {
 		transform(self)
@@ -20,17 +24,6 @@ extension View {
 		}
 		else { self }
 	}
-}
-
-extension EnvironmentValues {
-	@Entry var bus = bus_t()
-	@Entry var screen_resolution = CGSize.zero
-}
-
-extension View {
-	func track_resolution(publish source : source_t? = nil) -> some View {
-		self.modifier(modifier_track_resolution(source : source))
-	}
 
 	func publish_single_tap(from source : source_t) -> some View {
 		self.modifier(modifier_publish_single_tap(source : source))
@@ -49,17 +42,22 @@ extension View {
 	}
 }
 
-private struct modifier_track_resolution : ViewModifier {
+struct track_resolution<Content : View> : View {
 	@Environment(\.displayScale) private var displayScale
 	@Environment(\.bus) private var bus
 
 	@State private var screen_resolution = CGSize.zero
 
 	let source : source_t?
+	let content : (CGSize) -> Content
 
-	func body(content : Content) -> some View {
-		content
-			.environment(\.screen_resolution, screen_resolution)
+	init(publish source : source_t? = nil, @ViewBuilder content : @escaping (CGSize) -> Content) {
+		self.source = source
+		self.content = content
+	}
+
+	var body : some View {
+		content(screen_resolution)
 			.onGeometryChange(
 				for : CGSize.self,
 				of : { proxy in proxy.size },
@@ -70,7 +68,12 @@ private struct modifier_track_resolution : ViewModifier {
 					}
 				}
 			)
+			.environment(\.screen_resolution, screen_resolution)
 	}
+}
+
+private extension EnvironmentValues {
+	@Entry var screen_resolution = CGSize.zero
 }
 
 private struct modifier_publish_single_tap : ViewModifier {
