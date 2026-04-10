@@ -35,8 +35,10 @@ private struct view : View {
 		VStack(spacing : 16) {
 			HStack(spacing : 16) {
 				view_editor()
+					.track_resolution()
 					.clipShape(RoundedRectangle(cornerRadius : 16))
 				view_visual()
+					.track_resolution(publish : .visual)
 					.clipShape(RoundedRectangle(cornerRadius : 16))
 			}
 			view_toolbar()
@@ -51,8 +53,7 @@ private struct view : View {
 
 private struct view_editor : View {
 	@Environment(\.state_b) private var state_b
-
-	@State private var screen_resolution : CGSize = .zero
+	@Environment(\.screen_resolution) private var screen_resolution
 
 	var body : some View {
 		let (select, bodies, elements, simulation,camera) = (state_b.value)~>(\.editor.select, \.bodies, \.elements, \.simulation, \.camera)
@@ -74,18 +75,16 @@ private struct view_editor : View {
 					}
 				}
 		}
-		.track_resolution(to : $screen_resolution)
-		.publish_double_tap(from : .editor, with : screen_resolution)
-		.publish_single_tap(from : .editor, with : screen_resolution)
-		.publish_drag(from : .editor, with : screen_resolution)
+		.publish_double_tap(from : .editor)
+		.publish_single_tap(from : .editor)
+		.publish_drag(from : .editor)
 		.publish_magnify(from : .editor)
 	}
 }
 
 private struct view_visual : View {
 	@Environment(\.state_b) private var state_b
-
-	@State private var screen_resolution : CGSize = .zero
+	@Environment(\.screen_resolution) private var screen_resolution
 
 	var body : some View {
 		let fragment = state_b.value.visual.fragment
@@ -95,8 +94,7 @@ private struct view_visual : View {
 					content.overlay(fragment)
 				}
 		}
-		.track_resolution(to : $screen_resolution, publish : .visual)
-		.publish_single_tap(from : .visual, with : screen_resolution)
+		.publish_single_tap(from : .visual)
 	}
 }
 
