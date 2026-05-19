@@ -27,6 +27,7 @@ func element_remove(_ elements : [body_t], _ simulation : simulation_t) -> [body
 	}
 }
 
+nonisolated
 func simulate_element(
 	_ old : body_t,
 	_ bodies : [body_t],
@@ -79,7 +80,39 @@ func simulate_elements(
 )
 -> [body_t]
 {
-	elements.map { element in
+	elements.parallel_map { element in
 		simulate_element(element, bodies, simulation, now)
+	}
+}
+
+extension Array {
+	func parallel_map<T>(chunk : Int? = nil, _ transform : @escaping @Sendable (Element) -> T) -> [T] {
+		let safe = ProcessInfo.processInfo.activeProcessorCount * 4
+		let chunk = chunk ?? self.count / safe
+		let batch_size = Swift.max(1, chunk)
+		let batch_n = (self.count + batch_size - 1) / batch_size
+
+		let array = Array<T>(
+			unsafeUninitializedCapacity : self.count
+		) {
+			buffer, count
+		in
+			guard let address = buffer.baseAddress else {
+				count = 0
+				return
+			}
+			DispatchQueue.global(qos: .utility).sync {
+				DispatchQueue.concurrentPerform(iterations : batch_n) { batch_i in
+					let start = batch_i * batch_size
+					let end = Swift.min(start + batch_size, self.count)
+					for i in start ..< end {
+						(address + i).initialize(to : transform(self[i]))
+					}
+				}
+			}
+			count = self.count
+		}
+
+		return array
 	}
 }
